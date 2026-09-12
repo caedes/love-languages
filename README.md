@@ -35,9 +35,11 @@ pnpm check      # signale sans rien écrire
 
 Un hook de pre-commit (husky) lance `biome check --write` sur les seuls fichiers
 indexés, puis les réindexe : un commit mal formaté est corrigé au passage et
-aboutit. Ce que Biome ne sait pas corriger seul — une clé de liste instable, un
-rôle ARIA qui devrait être une balise — refuse le commit. La même vérification
-tourne en CI (`pnpm check:ci`), car un hook local se contourne avec
+aboutit. Un diagnostic de sévérité *error* — une clé de liste instable, un rôle
+ARIA qui devrait être une balise — refuse le commit. C'est la sévérité qui
+tranche, et non la capacité de Biome à corriger tout seul : un *warning*, telle
+une variable inutilisée, s'affiche et laisse passer, y compris en CI. La même
+vérification tourne en CI (`pnpm check:ci`), car un hook local se contourne avec
 `git commit --no-verify` et n'existe pas tant que `pnpm install` n'a pas tourné.
 
 Deux choses à savoir :

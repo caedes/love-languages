@@ -136,8 +136,7 @@ formatage et correctifs sûrs, `--files-ignore-unknown` évite d'échouer sur un
 commit qui ne touche que du Markdown, `--no-errors-on-unmatched` évite d'échouer
 quand rien ne matche. Biome **ne réindexe pas** ce qu'il corrige, d'où
 `git update-index --again`, qui réindexe exactement les chemins déjà présents
-dans l'index. Une erreur non corrigeable automatiquement fait sortir Biome en
-échec et le commit est refusé.
+dans l'index. Un diagnostic de sévérité `error` fait sortir Biome en échec et le commit est refusé ; les avertissements s'affichent sans bloquer. C'est la sévérité qui tranche, pas la corrigeabilité automatique.
 
 ### Limite connue
 
@@ -226,8 +225,8 @@ les espaces, cela se vérifie au lieu de se supposer.
    faire passer.
 3. Un commit contenant un fichier mal formaté est corrigé et réindexé par le
    hook, et passe.
-4. Un commit contenant une erreur de lint non corrigeable automatiquement est
-   refusé par le hook.
+4. Un commit contenant un diagnostic de lint de sévérité `error` non corrigeable
+   automatiquement est refusé par le hook.
 5. La CI échoue sur une branche où un fichier n'est pas conforme.
 6. Un clone neuf suivi de `pnpm install` dispose du hook actif.
 7. Le README explique les commandes, la limite du `git add -p` et la
