@@ -12,15 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Avant setup-node : celui-ci a besoin de pnpm pour resoudre son cache.
       # La version est lue dans le champ packageManager de package.json.
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -33,7 +33,7 @@ jobs:
 
       # Ce qui part en prod est le bundle qui vient de passer les tests, et non
       # un rebuild : le job deploy recupere cet artefact tel quel.
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
@@ -48,14 +48,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/download-artifact@v4
+      # En premier : checkout nettoie le workspace. Place apres le telechargement
+      # de l'artefact, il effacerait le dist/ qu'on vient de recuperer. Il n'est
+      # la que pour donner acces au .nvmrc, seule source de la version de Node.
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
 
       # --no-build : Netlify ne construit rien ici, il recoit un dist/ deja bati.
       - run: npx --yes netlify-cli@27 deploy --prod --dir=dist --no-build
