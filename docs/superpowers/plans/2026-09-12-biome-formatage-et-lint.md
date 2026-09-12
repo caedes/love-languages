@@ -114,7 +114,7 @@ Dans `package.json`, bloc `scripts`, après `"build"` :
 
 - [ ] **Step 4 : Vérifier que Biome voit bien le dépôt**
 
-Run: `pnpm exec biome check --max-diagnostics=500 --reporter=summary`
+Run: `./node_modules/.bin/biome check --max-diagnostics=500 --reporter=summary`
 
 Expected: sortie en erreur (c'est normal, rien n'est encore corrigé) avec
 **70 diagnostics** — 52 erreurs, 7 avertissements, 11 infos. Les règles listées
@@ -156,7 +156,7 @@ git commit -m "chore: 🤖 ajoute Biome et sa configuration"
 - [ ] **Step 1 : Formater**
 
 ```bash
-pnpm exec biome format --write .
+./node_modules/.bin/biome format --write .
 ```
 
 `format` et non `check` : cette étape ne doit contenir **que** de la mise en
@@ -269,7 +269,7 @@ arrêter : le formatage de la tâche 2 était incomplet.
 
 - [ ] **Step 3 : Contrôler le décompte**
 
-Run: `pnpm exec biome check --max-diagnostics=500 --reporter=summary`
+Run: `./node_modules/.bin/biome check --max-diagnostics=500 --reporter=summary`
 
 Expected: 39 diagnostics — 22 erreurs, 7 avertissements, 10 infos. Plus aucune
 ligne `assist/source/organizeImports`.
@@ -316,7 +316,7 @@ l'implémenteur de le constater, pas à l'outil de l'affirmer.
 - [ ] **Step 1 : Appliquer**
 
 ```bash
-pnpm exec biome check --write --unsafe --max-diagnostics=500 .
+./node_modules/.bin/biome check --write --unsafe --max-diagnostics=500 .
 ```
 
 - [ ] **Step 2 : Relire les cinq fichiers modifiés**
@@ -388,7 +388,7 @@ Expected: aucun résultat. `src/App.jsx` conserve son import — il étend
 
 - [ ] **Step 3 : Contrôler le décompte**
 
-Run: `pnpm exec biome check --max-diagnostics=500 --reporter=summary`
+Run: `./node_modules/.bin/biome check --max-diagnostics=500 --reporter=summary`
 
 Expected: 23 diagnostics — 22 erreurs, 1 info. Quatre règles restantes :
 `useIterableCallbackReturn` (5), `noArrayIndexKey` (3), `useSemanticElements` (3),
@@ -496,7 +496,7 @@ Aucune assertion ne change, aucun `expect` n'est ajouté ni retiré.
 
 - [ ] **Step 4 : Vérifier que la règle est éteinte**
 
-Run: `pnpm exec biome check --max-diagnostics=500 --reporter=summary`
+Run: `./node_modules/.bin/biome check --max-diagnostics=500 --reporter=summary`
 
 Expected: 17 erreurs restantes, et plus aucune ligne
 `lint/suspicious/useIterableCallbackReturn`.
@@ -554,7 +554,7 @@ Expected: exactement onze lignes ajoutées, zéro ligne supprimée.
 
 - [ ] **Step 3 : Vérifier que la règle est éteinte**
 
-Run: `pnpm exec biome check --max-diagnostics=500 --reporter=summary`
+Run: `./node_modules/.bin/biome check --max-diagnostics=500 --reporter=summary`
 
 Expected: 6 erreurs restantes, plus aucune ligne `lint/a11y/useButtonType`.
 
@@ -645,7 +645,7 @@ Ne pas le retirer de la signature.
 
 - [ ] **Step 4 : Vérifier que la règle est éteinte**
 
-Run: `pnpm exec biome check --max-diagnostics=500 --reporter=summary`
+Run: `./node_modules/.bin/biome check --max-diagnostics=500 --reporter=summary`
 
 Expected: 3 erreurs restantes, toutes `lint/a11y/useSemanticElements`.
 
@@ -765,7 +765,7 @@ et la fermeture correspondante en `</fieldset>`. Le `border` et le
 
 - [ ] **Step 5 : Vérifier que Biome est satisfait**
 
-Run: `pnpm exec biome check --max-diagnostics=500`
+Run: `./node_modules/.bin/biome check --max-diagnostics=500`
 
 Expected: **aucun diagnostic.** C'est le premier moment du plan où le dépôt est
 entièrement conforme.
@@ -835,7 +835,7 @@ scripts.
 Remplacer le contenu de `.husky/pre-commit` par :
 
 ```sh
-pnpm exec biome check --write --staged --files-ignore-unknown=true --no-errors-on-unmatched
+./node_modules/.bin/biome check --write --staged --files-ignore-unknown=true --no-errors-on-unmatched
 git update-index --again
 ```
 
@@ -1207,9 +1207,17 @@ un push sur `main`).
 diagnostics attendu après elle. Un écart signale une erreur de manipulation
 bien avant que les tests ne s'en aperçoivent. Toujours passer
 `--max-diagnostics=500` : la valeur par défaut est 20, et une sortie tronquée
-donne de faux décomptes. Ces appels-là passent par `pnpm exec biome check …`
-plutôt que par `pnpm check`, pour ne pas dépendre de la façon dont pnpm
-transmet les drapeaux à un script.
+donne de faux décomptes.
+
+Ces appels de mesure invoquent le binaire par son chemin,
+`./node_modules/.bin/biome`, et non `pnpm check` ni `./node_modules/.bin/biome`. Deux
+raisons : `pnpm check --drapeau` ne garantit pas la transmission du drapeau au
+script sous-jacent, et surtout, sur un poste où un outil réécrit les commandes
+`pnpm` à la volée, une sortie filtrée peut afficher « No issues found » sur un
+dépôt qui n'est pas propre. Un faux négatif de mesure est le pire mode de
+défaillance de ce plan : chaque tâche s'appuie sur son décompte. `pnpm check`
+et `pnpm check:ci` restent les commandes du quotidien et de la CI — ce sont
+elles que le README documente.
 
 **`biome check` contre `biome format`.** `format` ne fait que la mise en forme.
 `check` y ajoute le lint et les *assists*. La tâche 2 exige `format` pour que le
