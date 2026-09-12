@@ -2,6 +2,9 @@
 
 ## Démarrer
 
+Node 24 est requis (`.nvmrc` — `nvm use` le prend en compte). C'est aussi la
+version que lit la CI.
+
 ```bash
 pnpm install
 pnpm dev      # http://localhost:5173
