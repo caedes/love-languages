@@ -71,6 +71,17 @@ describe('écran d’accueil', () => {
     render(<App />);
     expect(screen.queryByRole('button', { name: /Reprendre/ })).not.toBeInTheDocument();
   });
+
+  /**
+   * La promesse de confidentialité est la raison d’être de l’app : tout tient en
+   * localStorage, rien ne sort. Elle se perd facilement dans une reformulation.
+   */
+  it('promet que les réponses ne partent jamais sur un serveur', () => {
+    render(<App />);
+    expect(
+      screen.getByText(/conservées sur cet appareil uniquement, jamais envoyées sur un serveur/),
+    ).toBeInTheDocument();
+  });
 });
 
 describe('écran de passation', () => {
@@ -149,7 +160,7 @@ describe('écran de passation', () => {
     await repondre(user, 0, 0);
     await user.click(screen.getByRole('button', { name: 'Accueil' }));
 
-    expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Les 5 langages de l’amour' })).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Reprendre où nous en étions (1 / 30)' }),
     ).toBeInTheDocument();
@@ -168,7 +179,7 @@ describe('écran de passation', () => {
       vi.advanceTimersByTime(400);
     });
 
-    expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Les 5 langages de l’amour' })).toBeInTheDocument();
   });
 
   it('efface les deux réponses de l’item précédent au retour arrière', async () => {
@@ -381,7 +392,7 @@ describe('persistance locale', () => {
     vue.unmount();
 
     render(<App />);
-    expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Les 5 langages de l’amour' })).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Reprendre où nous en étions (2 / 30)' }),
     ).toBeInTheDocument();

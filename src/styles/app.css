@@ -13,6 +13,10 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
+  /* Du texte clair sur fond sombre rend trop gras sous macOS : le lissage en
+     niveaux de gris lui redonne la graisse dessinée. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
