@@ -73,6 +73,67 @@ describe('écran d’accueil', () => {
   });
 
   /**
+   * Le cœur est décoratif : il est `aria-hidden`, donc hors de portée des
+   * requêtes par rôle. `App.jsx` ne produit aucun autre `svg`, la recherche par
+   * balise désigne donc bien le logo.
+   */
+  it('coiffe l’accueil du cœur du site', () => {
+    const { container } = render(<App />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  /**
+   * La coque ne défile pas (`overflow: hidden`) : sur un écran court, c'est au
+   * cœur de céder, jamais aux boutons de sortir de l'écran. Mesuré dans un
+   * navigateur, un logo en `flex: none` coupait le paragraphe final dès 667 px
+   * de haut quand une reprise est proposée. jsdom ne met rien en page : le test
+   * garde la déclaration, seul témoin durable de cette contrainte.
+   */
+  it('laisse le cœur rétrécir plutôt que de pousser les boutons hors de l’écran', () => {
+    const { container } = render(<App />);
+
+    expect(container.querySelector('svg').parentElement).toHaveStyle({
+      flexShrink: '200',
+      minHeight: '0px',
+    });
+  });
+
+  /**
+   * La passation porte son propre cœur, en curseur de progression. Ce test garde
+   * l'intention d'origine — le grand logo de l'accueil ne suit pas : le seul cœur
+   * présent est celui qui est posé en absolu sur la barre.
+   */
+  it('laisse le grand logo à l’accueil, la passation n’ayant que son curseur', async () => {
+    const user = preparer();
+    const { container } = render(<App />);
+    await demarrer(user);
+
+    const coeurs = container.querySelectorAll('svg');
+    expect(coeurs).toHaveLength(1);
+    expect(coeurs[0].parentElement).toHaveStyle({ position: 'absolute' });
+  });
+
+  /**
+   * La barre rogne ce qui dépasse de ses 3 px : le cœur vit au-dessus d'elle,
+   * posé en pourcentage. Le décalage négatif du même pourcentage le garde dans
+   * la barre à ses deux bouts, sans jamais avoir à connaître sa largeur.
+   */
+  it('avance le cœur au rythme de la barre de progression', async () => {
+    const user = preparer();
+    const { container } = render(<App />);
+    await demarrer(user);
+
+    expect(container.querySelector('svg').parentElement).toHaveStyle({ left: '0%' });
+
+    await repondre(user, 0, 1);
+
+    expect(container.querySelector('svg').parentElement).toHaveStyle({
+      left: '3%',
+      transform: 'translate(-3%, -50%)',
+    });
+  });
+
+  /**
    * La promesse de confidentialité est la raison d’être de l’app : tout tient en
    * localStorage, rien ne sort. Elle se perd facilement dans une reformulation.
    */
