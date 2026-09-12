@@ -127,6 +127,31 @@ describe('écran de passation', () => {
     expect(screen.getAllByRole('group')[0]).toHaveAccessibleName(DATA.items[1].options[0].texte);
   });
 
+  it('revient à l’accueil sans perdre les réponses déjà données', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondre(user, 0, 0);
+    await user.click(screen.getByRole('button', { name: 'Accueil' }));
+
+    expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reprendre où nous en étions (1 / 30)' })).toBeInTheDocument();
+  });
+
+  it('n’avance pas sur les résultats quand on rentre à l’accueil au dernier item', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    for (let i = 0; i < DATA.items.length - 1; i += 1) await repondre(user, 0, 0);
+    const cartes = screen.getAllByRole('group');
+    await user.click(within(cartes[0]).getByRole('button', { name: 'Alice' }));
+    await user.click(within(cartes[0]).getByRole('button', { name: 'Bob' }));
+    await user.click(screen.getByRole('button', { name: 'Accueil' }));
+    await act(async () => { vi.advanceTimersByTime(400); });
+
+    expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
+  });
+
   it('efface les deux réponses de l’item précédent au retour arrière', async () => {
     const user = preparer();
     render(<App />);
@@ -253,8 +278,49 @@ describe('écran de résultats', () => {
   });
 });
 
+describe('effacement d’une passation en cours', () => {
+  it('demande confirmation et respecte l’annulation', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondre(user, 0, 0);
+    await user.click(screen.getByRole('button', { name: 'Accueil' }));
+    await user.click(screen.getByRole('button', { name: 'Commencer' }));
+
+    expect(screen.getByText('Effacer les réponses en cours et recommencer ?')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Annuler' }));
+
+    expect(screen.getByRole('button', { name: 'Reprendre où nous en étions (1 / 30)' })).toBeInTheDocument();
+  });
+
+  it('repart de la première question une fois la confirmation donnée', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondre(user, 0, 0);
+    await user.click(screen.getByRole('button', { name: 'Accueil' }));
+    await user.click(screen.getByRole('button', { name: 'Commencer' }));
+    await user.click(screen.getByRole('button', { name: 'Oui, effacer' }));
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 1 sur 30');
+    screen.getAllByRole('group').forEach((carte) => {
+      within(carte).getAllByRole('button').forEach((b) => {
+        expect(b).toHaveAttribute('aria-pressed', 'false');
+      });
+    });
+  });
+
+  it('démarre sans confirmation quand rien n’est sauvegardé', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 1 sur 30');
+  });
+});
+
 describe('persistance locale', () => {
-  it('reprend à la question en cours après un remontage', async () => {
+  it('revient sur l’accueil après un remontage, en proposant la reprise', async () => {
     const user = preparer();
     const vue = render(<App />);
     await demarrer(user);
@@ -263,8 +329,34 @@ describe('persistance locale', () => {
     vue.unmount();
 
     render(<App />);
-    // La sauvegarde restaure aussi l'écran : on revient directement sur la passation.
+    expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reprendre où nous en étions (2 / 30)' })).toBeInTheDocument();
+  });
+
+  it('rouvre la question en cours au clic sur la reprise', async () => {
+    const user = preparer();
+    const vue = render(<App />);
+    await demarrer(user);
+    await repondre(user, 0, 0);
+    await repondre(user, 0, 0);
+    vue.unmount();
+
+    render(<App />);
+    await user.click(screen.getByRole('button', { name: /Reprendre/ }));
+
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 3 sur 30');
+  });
+
+  it('restaure les prénoms saisis après un remontage', async () => {
+    const user = preparer();
+    const vue = render(<App />);
+    await demarrer(user);
+    await repondre(user, 0, 0);
+    vue.unmount();
+
+    render(<App />);
+    expect(screen.getByLabelText('Premier prénom')).toHaveValue('Alice');
+    expect(screen.getByLabelText('Second prénom')).toHaveValue('Bob');
   });
 
   it('propose de revoir le dernier résultat depuis l’accueil', async () => {
@@ -295,6 +387,7 @@ describe('persistance locale', () => {
     await repondreTout(user, 0, 0);
     await user.click(screen.getByRole('button', { name: 'Recommencer' }));
     await user.click(screen.getByRole('button', { name: 'Commencer' }));
+    await user.click(screen.getByRole('button', { name: 'Oui, effacer' }));
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 1 sur 30');
     screen.getAllByRole('group').forEach((carte) => {
