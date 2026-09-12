@@ -47,7 +47,7 @@ configuration de la tâche 1. Ils servent de contrôle : un écart important à 
 
 | après la tâche | diagnostics attendus |
 | --- | --- |
-| 1 (configuration) | 69 — 51 erreurs, 7 avertissements, 11 infos |
+| 1 (configuration) | 70 — 52 erreurs, 7 avertissements, 11 infos |
 | 2 (formatage) | 49 — 32 erreurs, 7 avertissements, 10 infos |
 | 3 (correctifs sûrs) | 39 — 22 erreurs, 7 avertissements, 10 infos |
 | 4 (correctifs *unsafe*) | 23 — 22 erreurs, 1 info |
@@ -86,12 +86,21 @@ dépôt, une montée de version subie reformaterait tout sans prévenir.
 {
   "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": { "includes": ["**", "!public/favicon.svg"] },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "javascript": { "formatter": { "quoteStyle": "single" } },
   "css": { "formatter": { "quoteStyle": "single" } },
   "linter": { "enabled": true, "rules": { "recommended": true } }
 }
 ```
+
+`public/favicon.svg` est le seul fichier exclu, et pour une raison précise : il
+est **produit** par `pnpm icons`, via `scripts/generate-icons.mjs`. Un formateur
+qui réécrit la sortie d'un générateur, ou qui lui réclame un `<title>`
+(`a11y/noSvgWithoutTitle`), transforme la prochaine régénération légitime en CI
+rouge. Le générateur lui-même, dans `scripts/` et `src/icons/`, reste
+intégralement soumis au linter. `public/site.webmanifest`, écrit à la main,
+reste lui aussi dans le périmètre.
 
 - [ ] **Step 3 : Ajouter les trois scripts**
 
@@ -108,7 +117,7 @@ Dans `package.json`, bloc `scripts`, après `"build"` :
 Run: `pnpm exec biome check --max-diagnostics=500 --reporter=summary`
 
 Expected: sortie en erreur (c'est normal, rien n'est encore corrigé) avec
-**69 diagnostics** — 51 erreurs, 7 avertissements, 11 infos. Les règles listées
+**70 diagnostics** — 52 erreurs, 7 avertissements, 11 infos. Les règles listées
 doivent inclure `lint/suspicious/noArrayIndexKey` : sa présence prouve que Biome
 a bien détecté le *domain* React depuis `package.json`. Si elle manque, la
 configuration n'est pas lue — ne pas continuer.
