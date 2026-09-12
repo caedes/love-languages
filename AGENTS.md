@@ -43,6 +43,21 @@ test: 💍 exerce le branchement de l'affichage inversé
 refactor: 💡 extrait le calcul des profils vers scoring.js
 ```
 
+## Formatage
+
+Biome tient la mise en forme et le lint de tout ce qui est JS, JSX, JSON et CSS.
+Ne discutez pas le style avec l'outil : `pnpm format` tranche. Un hook de
+pre-commit l'applique aux fichiers indexés, et `pnpm check:ci` garde la CI.
+
+Deux règles de travail :
+
+- **Ne jamais désactiver une règle pour faire passer un commit.** Un
+  `biome-ignore` se justifie par une raison écrite sur la ligne même, et se
+  limite au site concerné.
+- **Ne jamais lancer `biome check --unsafe` en aveugle.** Ces correctifs
+  changent le code sans que l'outil puisse prouver qu'il préserve le
+  comportement : ils se relisent un par un.
+
 ## Pull requests
 
 `main` est protégée par un ruleset : pull request obligatoire, CI verte

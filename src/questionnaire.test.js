@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { DATA, levelFor, de } from './questionnaire.js';
+import { describe, expect, it } from 'vitest';
+import { DATA, de, levelFor } from './questionnaire.js';
 
 describe('intégrité du questionnaire', () => {
-  it('contient le nombre d\'items annoncé par meta', () => {
+  it("contient le nombre d'items annoncé par meta", () => {
     expect(DATA.items).toHaveLength(DATA.meta.nombreItems);
     expect(DATA.items).toHaveLength(30);
   });
@@ -26,17 +26,21 @@ describe('intégrité du questionnaire', () => {
 
   it('propose chaque dimension exactement scoreMaxParDimension fois', () => {
     const compte = {};
-    DATA.meta.dimensions.forEach((d) => { compte[d.code] = 0; });
-    DATA.items.forEach((item) => item.options.forEach((opt) => { compte[opt.code] += 1; }));
+    DATA.meta.dimensions.forEach((d) => {
+      compte[d.code] = 0;
+    });
+    DATA.items.forEach((item) => {
+      item.options.forEach((opt) => {
+        compte[opt.code] += 1;
+      });
+    });
     DATA.meta.dimensions.forEach((d) => {
       expect(compte[d.code]).toBe(DATA.meta.scoreMaxParDimension);
     });
   });
 
-  it('verrouille l\'appariement des dimensions item par item', () => {
-    const paires = DATA.items.map(
-      (i) => i.id + ' ' + i.options[0].code + '/' + i.options[1].code
-    );
+  it("verrouille l'appariement des dimensions item par item", () => {
+    const paires = DATA.items.map((i) => `${i.id} ${i.options[0].code}/${i.options[1].code}`);
     expect(paires).toMatchInlineSnapshot(`
       [
         "1 P/T",
@@ -82,7 +86,7 @@ describe('levelFor', () => {
     [6, 'Langage secondaire'],
     [5, 'Canal intermédiaire'],
     [4, 'Canal neutre'],
-    [0, 'Canal neutre']
+    [0, 'Canal neutre'],
   ])('classe le score %i en « %s »', (score, niveau) => {
     expect(levelFor(score).niveau).toBe(niveau);
   });
@@ -94,7 +98,7 @@ describe('de', () => {
     ['Élodie', "d'"],
     ['Bob', 'de '],
     ['', 'de '],
-    [undefined, 'de ']
+    [undefined, 'de '],
   ])('élide correctement devant %s', (prenom, attendu) => {
     expect(de(prenom)).toBe(attendu);
   });

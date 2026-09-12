@@ -1,0 +1,5 @@
+# Commits de reformatage massif : ils ne portent aucun changement de
+# comportement et noieraient git blame. GitHub lit ce fichier automatiquement.
+# En local : git config blame.ignoreRevsFile .git-blame-ignore-revs
+fea896e59ade0c42850948f934d49a11fe607ad0
+36d949226a2cf355fd488df7b07c72e0318f065e

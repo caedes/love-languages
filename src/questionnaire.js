@@ -12,11 +12,13 @@ export const DIM_COLOR = {
   M: 'oklch(0.75 0.085 232)',
   C: 'oklch(0.79 0.085 78)',
   S: 'oklch(0.78 0.075 163)',
-  T: 'oklch(0.75 0.095 18)'
+  T: 'oklch(0.75 0.095 18)',
 };
 
 export const DIM_NAME = {};
-DATA.meta.dimensions.forEach((d) => { DIM_NAME[d.code] = d.nom; });
+DATA.meta.dimensions.forEach((d) => {
+  DIM_NAME[d.code] = d.nom;
+});
 
 export const SEL_BG = 'color-mix(in srgb, var(--color-accent) 34%, var(--color-surface))';
 export const SEL_BORDER = 'var(--color-accent)';

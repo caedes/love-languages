@@ -1,7 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { toSvg } from './svg.js';
 
-const GRILLE = [[1, 0], [0, 2]];
+const GRILLE = [
+  [1, 0],
+  [0, 2],
+];
 const PALETTE = ['#000000', '#ff0000', '#0000ff'];
 
 describe('toSvg', () => {

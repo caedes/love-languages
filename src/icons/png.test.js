@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import { inflateSync } from 'node:zlib';
+import { describe, expect, it } from 'vitest';
 import { crc32, encodePng } from './png.js';
 
 const SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
@@ -51,7 +51,9 @@ describe('encodePng', () => {
   });
 
   it('restitue les pixels, chaque ligne précédée de son octet de filtre', () => {
-    const idat = chunks(encodePng({ width: 1, height: 2, data: new Uint8Array([1, 2, 3, 4, 5, 6]) }))[1];
+    const idat = chunks(
+      encodePng({ width: 1, height: 2, data: new Uint8Array([1, 2, 3, 4, 5, 6]) }),
+    )[1];
     expect([...inflateSync(idat.data)]).toEqual([0, 1, 2, 3, 0, 4, 5, 6]);
   });
 

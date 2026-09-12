@@ -1,7 +1,6 @@
-import React from 'react';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, within, act } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App.jsx';
 import { DATA } from './questionnaire.js';
 
@@ -29,7 +28,9 @@ async function repondre(user, slotAlice, slotBob) {
   const cartes = screen.getAllByRole('group');
   await user.click(within(cartes[slotAlice]).getByRole('button', { name: 'Alice' }));
   await user.click(within(cartes[slotBob]).getByRole('button', { name: 'Bob' }));
-  await act(async () => { vi.advanceTimersByTime(400); });
+  await act(async () => {
+    vi.advanceTimersByTime(400);
+  });
 }
 
 /** Répond aux 30 items : Alice sur la position `slotAlice`, Bob sur `slotBob`. */
@@ -48,8 +49,12 @@ function texteIntegral(attendu) {
   return (_, element) => element.textContent.replace(/\s+/g, ' ').trim() === attendu;
 }
 
-beforeEach(() => { window.localStorage.clear(); });
-afterEach(() => { vi.useRealTimers(); });
+beforeEach(() => {
+  window.localStorage.clear();
+});
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('écran d’accueil', () => {
   it('interdit de commencer tant qu’un prénom manque', async () => {
@@ -74,7 +79,9 @@ describe('écran de passation', () => {
     render(<App />);
     await demarrer(user);
 
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Chacun choisit sa proposition');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'Chacun choisit sa proposition',
+    );
     const barre = screen.getByRole('progressbar');
     expect(barre).toHaveAttribute('aria-valuenow', '0');
     expect(barre).toHaveAttribute('aria-valuemax', String(DATA.items.length));
@@ -103,8 +110,14 @@ describe('écran de passation', () => {
     const alice = within(cartes[0]).getByRole('button', { name: 'Alice' });
     expect(alice).toHaveAttribute('aria-pressed', 'false');
     await user.click(alice);
-    expect(within(cartes[0]).getByRole('button', { name: 'Alice' })).toHaveAttribute('aria-pressed', 'true');
-    expect(within(cartes[1]).getByRole('button', { name: 'Alice' })).toHaveAttribute('aria-pressed', 'false');
+    expect(within(cartes[0]).getByRole('button', { name: 'Alice' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(within(cartes[1]).getByRole('button', { name: 'Alice' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('annonce qui doit encore répondre', async () => {
@@ -113,7 +126,9 @@ describe('écran de passation', () => {
     await demarrer(user);
 
     expect(screen.getByRole('status')).toBeEmptyDOMElement();
-    await user.click(within(screen.getAllByRole('group')[0]).getByRole('button', { name: 'Alice' }));
+    await user.click(
+      within(screen.getAllByRole('group')[0]).getByRole('button', { name: 'Alice' }),
+    );
     expect(screen.getByRole('status')).toHaveTextContent('En attente de Bob');
   });
 
@@ -135,7 +150,9 @@ describe('écran de passation', () => {
     await user.click(screen.getByRole('button', { name: 'Accueil' }));
 
     expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reprendre où nous en étions (1 / 30)' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Reprendre où nous en étions (1 / 30)' }),
+    ).toBeInTheDocument();
   });
 
   it('n’avance pas sur les résultats quand on rentre à l’accueil au dernier item', async () => {
@@ -147,7 +164,9 @@ describe('écran de passation', () => {
     await user.click(within(cartes[0]).getByRole('button', { name: 'Alice' }));
     await user.click(within(cartes[0]).getByRole('button', { name: 'Bob' }));
     await user.click(screen.getByRole('button', { name: 'Accueil' }));
-    await act(async () => { vi.advanceTimersByTime(400); });
+    await act(async () => {
+      vi.advanceTimersByTime(400);
+    });
 
     expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
   });
@@ -161,9 +180,11 @@ describe('écran de passation', () => {
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 1 sur 30');
     screen.getAllByRole('group').forEach((carte) => {
-      within(carte).getAllByRole('button').forEach((b) => {
-        expect(b).toHaveAttribute('aria-pressed', 'false');
-      });
+      within(carte)
+        .getAllByRole('button')
+        .forEach((b) => {
+          expect(b).toHaveAttribute('aria-pressed', 'false');
+        });
     });
   });
 });
@@ -183,7 +204,9 @@ describe('parcours complet', () => {
     const profilAlice = screen.getByRole('group', { name: 'Alice' });
     const profilBob = screen.getByRole('group', { name: 'Bob' });
     [profilAlice, profilBob].forEach((profil) => {
-      expect(within(profil).getByText(texteIntegral('Paroles valorisantes9/12'))).toBeInTheDocument();
+      expect(
+        within(profil).getByText(texteIntegral('Paroles valorisantes9/12')),
+      ).toBeInTheDocument();
       expect(within(profil).getByText(texteIntegral('Moments de qualité7/12'))).toBeInTheDocument();
       expect(within(profil).getByText(texteIntegral('Cadeaux5/12'))).toBeInTheDocument();
       expect(within(profil).getByText(texteIntegral('Contact physique5/12'))).toBeInTheDocument();
@@ -206,7 +229,9 @@ describe('parcours complet', () => {
       expect(within(profil).getByText(texteIntegral('Cadeaux7/12'))).toBeInTheDocument();
       expect(within(profil).getByText(texteIntegral('Contact physique7/12'))).toBeInTheDocument();
       expect(within(profil).getByText(texteIntegral('Moments de qualité5/12'))).toBeInTheDocument();
-      expect(within(profil).getByText(texteIntegral('Paroles valorisantes3/12'))).toBeInTheDocument();
+      expect(
+        within(profil).getByText(texteIntegral('Paroles valorisantes3/12')),
+      ).toBeInTheDocument();
     });
   });
 
@@ -221,15 +246,29 @@ describe('parcours complet', () => {
     // Bob toujours la seconde (P=3, canal neutre) : c'est bien Alice le besoin fort.
     // { selector: 'p' } : sans lui, le texte intégral du <div> englobant (son seul enfant est
     // ce <p>) matche aussi, et getByText lève une erreur d'ambiguïté sur les deux éléments.
-    expect(screen.getByText(texteIntegral(
-      'Alice a un besoin fort de Paroles valorisantes, une dimension peu sensible chez Bob.'
-    ), { selector: 'p' })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        texteIntegral(
+          'Alice a un besoin fort de Paroles valorisantes, une dimension peu sensible chez Bob.',
+        ),
+        { selector: 'p' },
+      ),
+    ).toBeInTheDocument();
 
     expect(screen.getByRole('button', { name: 'Divergences (30)' })).toBeInTheDocument();
   });
 });
 
 describe('écran de résultats', () => {
+  it('expose le groupe des onglets avec son nom accessible', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 1);
+
+    expect(screen.getByRole('group', { name: 'Vue des résultats' })).toBeInTheDocument();
+  });
+
   it('expose l’onglet actif par aria-pressed', async () => {
     const user = preparer();
     render(<App />);
@@ -237,11 +276,20 @@ describe('écran de résultats', () => {
     await repondreTout(user, 0, 1);
 
     expect(screen.getByRole('button', { name: 'Profils' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Vigilance' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Vigilance' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
 
     await user.click(screen.getByRole('button', { name: 'Vigilance' }));
-    expect(screen.getByRole('button', { name: 'Vigilance' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Profils' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Vigilance' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByRole('button', { name: 'Profils' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('annonce la copie réussie de la synthèse', async () => {
@@ -263,7 +311,7 @@ describe('écran de résultats', () => {
     const user = preparer();
     Object.defineProperty(navigator, 'clipboard', {
       value: { writeText: vi.fn().mockRejectedValue(new Error('refus')) },
-      configurable: true
+      configurable: true,
     });
     // jsdom n'implémente pas execCommand : on le rend explicitement infructueux.
     document.execCommand = vi.fn(() => false);
@@ -290,7 +338,9 @@ describe('effacement d’une passation en cours', () => {
     expect(screen.getByText('Effacer les réponses en cours et recommencer ?')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Annuler' }));
 
-    expect(screen.getByRole('button', { name: 'Reprendre où nous en étions (1 / 30)' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Reprendre où nous en étions (1 / 30)' }),
+    ).toBeInTheDocument();
   });
 
   it('repart de la première question une fois la confirmation donnée', async () => {
@@ -304,9 +354,11 @@ describe('effacement d’une passation en cours', () => {
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 1 sur 30');
     screen.getAllByRole('group').forEach((carte) => {
-      within(carte).getAllByRole('button').forEach((b) => {
-        expect(b).toHaveAttribute('aria-pressed', 'false');
-      });
+      within(carte)
+        .getAllByRole('button')
+        .forEach((b) => {
+          expect(b).toHaveAttribute('aria-pressed', 'false');
+        });
     });
   });
 
@@ -330,7 +382,9 @@ describe('persistance locale', () => {
 
     render(<App />);
     expect(screen.getByRole('heading', { name: "Les 5 langages de l'amour" })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reprendre où nous en étions (2 / 30)' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Reprendre où nous en étions (2 / 30)' }),
+    ).toBeInTheDocument();
   });
 
   it('rouvre la question en cours au clic sur la reprise', async () => {
@@ -391,9 +445,11 @@ describe('persistance locale', () => {
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 1 sur 30');
     screen.getAllByRole('group').forEach((carte) => {
-      within(carte).getAllByRole('button').forEach((b) => {
-        expect(b).toHaveAttribute('aria-pressed', 'false');
-      });
+      within(carte)
+        .getAllByRole('button')
+        .forEach((b) => {
+          expect(b).toHaveAttribute('aria-pressed', 'false');
+        });
     });
   });
 });

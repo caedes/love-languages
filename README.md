@@ -22,6 +22,53 @@ pnpm test:coverage  # rapport de couverture dans coverage/
 Les tests interrogent l'interface comme le ferait un lecteur d'écran
 (rôles ARIA et libellés accessibles), sans `data-testid`.
 
+## Formatage et lint
+
+Biome tient le rôle de Prettier et d'ESLint à la fois, sur le JavaScript, le
+JSX, le JSON et le CSS. La configuration vit dans `biome.json` : deux espaces,
+guillemets simples, lignes à 100 colonnes, jeu de règles `recommended`.
+
+```bash
+pnpm format     # corrige : mise en forme, correctifs sûrs, tri des imports
+pnpm check      # signale sans rien écrire
+```
+
+Un hook de pre-commit (husky) lance `biome check --write` sur les seuls fichiers
+indexés, puis les réindexe : un commit mal formaté est corrigé au passage et
+aboutit. Un diagnostic de sévérité *error* — une clé de liste instable, un rôle
+ARIA qui devrait être une balise — refuse le commit. C'est la sévérité qui
+tranche, et non la capacité de Biome à corriger tout seul : un *warning*, telle
+une variable inutilisée, s'affiche et laisse passer, y compris en CI. La même
+vérification tourne en CI (`pnpm check:ci`), car un hook local se contourne avec
+`git commit --no-verify` et n'existe pas tant que `pnpm install` n'a pas tourné.
+
+Deux choses à savoir :
+
+- **`git add -p` et le hook font mauvais ménage.** `git update-index --again`
+  réindexe **tout chemin déjà indexé qui diffère de `HEAD`**, entier — que Biome
+  l'ait corrigé ou non. La portion que vous aviez délibérément laissée de côté
+  part donc avec le commit, y compris dans un fichier auquel Biome n'a pas
+  touché. Pour un commit partiel, passez par `git commit --no-verify` et lancez
+  `pnpm format` ensuite.
+- **Le blâme des lignes.** Deux commits ont reformaté tout le dépôt d'un coup.
+  Ils sont listés dans `.git-blame-ignore-revs`, que GitHub lit tout seul. En
+  local, une fois pour toutes :
+
+  ```bash
+  git config blame.ignoreRevsFile .git-blame-ignore-revs
+  ```
+
+Biome ne formate ni le Markdown ni le YAML : ce fichier, `AGENTS.md` et
+`.github/workflows/ci.yml` restent à votre main.
+
+Une exception ciblée désactive la règle `a11y/noSvgWithoutTitle` sur
+`public/**` (voir `overrides` dans `biome.json`). Cette règle réclame un
+`<title>` à tout SVG parce qu'elle vise le SVG inséré dans un document, qu'un
+lecteur d'écran doit pouvoir annoncer — une favicon, elle, n'est jamais
+annoncée par personne. Le fichier est en plus produit par `pnpm icons` : y
+satisfaire reviendrait à faire émettre au générateur un titre que rien ne
+lira. Le formatage, lui, continue de s'appliquer à `public/`.
+
 ## Icônes et aperçu de partage
 
 L'app est faite pour vivre sur l'écran d'accueil d'un téléphone. Les icônes
@@ -56,8 +103,10 @@ URL est à mettre à jour.
 
 ## Intégration continue
 
-`.github/workflows/ci.yml` rejoue `pnpm test:coverage` puis `pnpm build` sur
-chaque pull request vers `main` et sur chaque push vers `main`.
+`.github/workflows/ci.yml` rejoue `pnpm check:ci`, `pnpm test:coverage` puis
+`pnpm build` sur chaque pull request vers `main` et sur chaque push vers `main`.
+La vérification Biome passe en premier : elle rend la main en quelques secondes
+là où les tests prennent le temps qu'ils prennent.
 
 Les seuils de couverture vivent dans `vite.config.js` (`test.coverage.thresholds`) :
 sous le seuil, `vitest` sort en erreur et la CI échoue. C'est donc la même
