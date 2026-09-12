@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { resolveNames, scores, profileRows, vigilanceList, divergenceList, summaryText } from './scoring.js';
+import { describe, it, expect, vi } from 'vitest';
+import { resolveNames, scores, profileRows, vigilanceList, divergenceList, summaryText, makeOrders, slotFor, codeAt } from './scoring.js';
 import { REPONSES_PREMIERE_OPTION, REPONSES_SECONDE_OPTION, reponsesAvecDivergences } from './test/fixtures.js';
+import { DATA } from './questionnaire.js';
 
 describe('resolveNames', () => {
   it('retire les espaces autour des prénoms saisis', () => {
@@ -185,5 +186,62 @@ describe('summaryText', () => {
   it('reprend le total de contrôle de chaque participant', () => {
     const texte = summaryText([REPONSES_PREMIERE_OPTION, REPONSES_SECONDE_OPTION], NOMS);
     expect(texte).toContain('Total de contrôle : 30/30');
+  });
+});
+
+describe('makeOrders', () => {
+  it('tire un ordre par item', () => {
+    expect(makeOrders()).toHaveLength(DATA.items.length);
+  });
+
+  it('ne rend que des 0 et des 1', () => {
+    makeOrders().forEach((v) => expect([0, 1]).toContain(v));
+  });
+
+  it('inverse l’affichage sous le seuil de 0,5', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.2);
+    expect(makeOrders().every((v) => v === 1)).toBe(true);
+  });
+
+  it('conserve l’ordre du JSON au-dessus du seuil', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.9);
+    expect(makeOrders().every((v) => v === 0)).toBe(true);
+  });
+});
+
+describe('slotFor et codeAt', () => {
+  it('place la première option en haut quand l’affichage n’est pas inversé', () => {
+    const item = DATA.items[0];
+    expect(slotFor(item.options[0].code, item, false)).toBe(0);
+    expect(slotFor(item.options[1].code, item, false)).toBe(1);
+  });
+
+  it('intervertit les positions quand l’affichage est inversé', () => {
+    const item = DATA.items[0];
+    expect(slotFor(item.options[0].code, item, true)).toBe(1);
+    expect(slotFor(item.options[1].code, item, true)).toBe(0);
+  });
+
+  it('rend null pour une dimension absente de l’item', () => {
+    const item = DATA.items[0]; // P / T
+    expect(slotFor('C', item, false)).toBeNull();
+  });
+
+  it('rend la dimension effectivement affichée à une position donnée', () => {
+    const item = DATA.items[0];
+    expect(codeAt(item, false, 0)).toBe(item.options[0].code);
+    expect(codeAt(item, true, 0)).toBe(item.options[1].code);
+  });
+
+  it('fait l’aller-retour sans perte sur les 30 items, dans les deux sens', () => {
+    DATA.items.forEach((item) => {
+      [false, true].forEach((flipped) => {
+        item.options.forEach((opt) => {
+          const slot = slotFor(opt.code, item, flipped);
+          expect(slot).not.toBeNull();
+          expect(codeAt(item, flipped, slot)).toBe(opt.code);
+        });
+      });
+    });
   });
 });

@@ -111,3 +111,31 @@ export function summaryText(answers, names) {
   });
   return lines.join('\n');
 }
+
+/** Un ordre d'affichage tiré au sort par item, pour éviter le biais de position. */
+export function makeOrders() {
+  return DATA.items.map(() => (Math.random() < 0.5 ? 1 : 0));
+}
+
+/**
+ * La position à l'écran (0 ou 1) d'une dimension sur un item donné.
+ * @param {string} code
+ * @param {object} item
+ * @param {boolean} flipped
+ * @returns {0|1|null}
+ */
+export function slotFor(code, item, flipped) {
+  const i = item.options.findIndex((o) => o.code === code);
+  if (i < 0) return null;
+  return flipped ? 1 - i : i;
+}
+
+/**
+ * La dimension affichée à une position donnée : l'inverse exact de `slotFor`.
+ * @param {object} item
+ * @param {boolean} flipped
+ * @param {0|1} slot
+ */
+export function codeAt(item, flipped, slot) {
+  return item.options[flipped ? 1 - slot : slot].code;
+}

@@ -59,14 +59,9 @@ export default class App extends React.Component {
     clearTimeout(this._copyTimer);
   }
 
-  /** Un ordre d'affichage tiré au sort par item, pour éviter le biais de position. */
-  makeOrders() {
-    return DATA.items.map(() => (Math.random() < 0.5 ? 1 : 0));
-  }
-
   start() {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
-    this.setState({ screen: 'quiz', idx: 0, answers: [[], []], order: this.makeOrders(), tab: 'profils', divIdx: 0 });
+    this.setState({ screen: 'quiz', idx: 0, answers: [[], []], order: scoring.makeOrders(), tab: 'profils', divIdx: 0 });
   }
 
   resume() {
@@ -74,15 +69,6 @@ export default class App extends React.Component {
     const done = st.answers[0].filter(Boolean).length === DATA.items.length
       && st.answers[1].filter(Boolean).length === DATA.items.length;
     this.setState({ screen: done ? 'results' : 'quiz' });
-  }
-
-  /** La position à l'écran (0 ou 1) de la dimension déjà choisie sur l'item courant. */
-  slotFor(code) {
-    const item = DATA.items[this.state.idx];
-    const flipped = this.state.order[this.state.idx] === 1;
-    const i = item.options.findIndex((o) => o.code === code);
-    if (i < 0) return null;
-    return flipped ? 1 - i : i;
   }
 
   /**
@@ -94,7 +80,7 @@ export default class App extends React.Component {
     const idx = this.state.idx;
     const item = DATA.items[idx];
     const flipped = this.state.order[idx] === 1;
-    const code = item.options[flipped ? 1 - slot : slot].code;
+    const code = scoring.codeAt(item, flipped, slot);
     const answers = this.state.answers.map((a) => a.slice());
     answers[who][idx] = code;
     this.setState({ answers });
@@ -210,8 +196,8 @@ export default class App extends React.Component {
     const item = DATA.items[st.idx];
     const flipped = st.order[st.idx] === 1;
     const shown = flipped ? [item.options[1], item.options[0]] : [item.options[0], item.options[1]];
-    const selA = st.answers[0][st.idx] ? this.slotFor(st.answers[0][st.idx]) : null;
-    const selB = st.answers[1][st.idx] ? this.slotFor(st.answers[1][st.idx]) : null;
+    const selA = st.answers[0][st.idx] ? scoring.slotFor(st.answers[0][st.idx], item, flipped) : null;
+    const selB = st.answers[1][st.idx] ? scoring.slotFor(st.answers[1][st.idx], item, flipped) : null;
 
     const chip = (sel, slot, who) => (
       <button
