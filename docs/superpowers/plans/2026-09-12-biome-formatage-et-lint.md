@@ -90,7 +90,7 @@ dépôt, une montée de version subie reformaterait tout sans prévenir.
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "javascript": { "formatter": { "quoteStyle": "single" } },
   "css": { "formatter": { "quoteStyle": "single" } },
-  "linter": { "enabled": true, "rules": { "recommended": true } }
+  "linter": { "enabled": true, "rules": { "preset": "recommended" } }
 }
 ```
 
@@ -602,11 +602,16 @@ rendu.
 La chaîne elle-même est l'identité.
 
 ```diff
--          {consignes.map((t, i) => (
+           {consignes.map((t, i) => (
 -            <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-+          {consignes.map((t) => (
 +            <div key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
 ```
+
+**Garder `i` dans la signature.** Quelques lignes plus bas, dans le même bloc
+JSX, `{i + 1}` numérote la consigne affichée. Numéroter un affichage par son
+index reste légitime — ce qui ne l'est pas, c'est de s'en servir comme identité
+React. Retirer `i` obligerait à retrouver la position autrement, par une
+recherche linéaire à chaque rendu, pour un résultat identique en plus fragile.
 
 - [ ] **Step 2 : les deux propositions d'un item** (`shown.map`, vers la ligne 454)
 
