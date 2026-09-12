@@ -202,10 +202,13 @@ export default class App extends React.Component {
     const chip = (sel, slot, who) => (
       <button
         className="lq-chip"
+        type="button"
+        aria-pressed={sel === slot}
         onClick={() => this.pick(who, slot)}
         style={{ border: `1px solid ${sel === slot ? SEL_BORDER : OFF_BORDER}`, background: sel === slot ? SEL_BG : OFF_BG }}
       >
-        {(sel === slot ? '✓ ' : '') + names[who]}
+        {sel === slot && <span aria-hidden="true">✓ </span>}
+        {names[who]}
       </button>
     );
 
@@ -217,31 +220,41 @@ export default class App extends React.Component {
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, margin: '0 0 8px' }}>
-            <p style={{ margin: 0, fontSize: 12, letterSpacing: '.08em', textTransform: 'uppercase', color: muted(55) }}>Chacun choisit sa proposition</p>
+            <h1 style={{ margin: 0, fontSize: 12, fontWeight: 400, letterSpacing: '.08em', textTransform: 'uppercase', color: muted(55) }}>Chacun choisit sa proposition</h1>
             <p style={{ margin: 0, fontSize: 13, fontVariantNumeric: 'tabular-nums', color: muted(60) }}>{st.idx + 1} / {total}</p>
           </div>
-          <div style={{ height: 3, borderRadius: 2, background: muted(12), overflow: 'hidden' }}>
+          <div
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={total}
+            aria-valuenow={st.idx}
+            aria-valuetext={`question ${st.idx + 1} sur ${total}`}
+            style={{ height: 3, borderRadius: 2, background: muted(12), overflow: 'hidden' }}
+          >
             <div style={{ height: '100%', width: `${Math.round((st.idx / total) * 100)}%`, background: 'var(--color-accent)', transition: 'width .3s ease' }} />
           </div>
         </div>
 
         <div key={st.idx} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18, animation: 'lqFade .22s ease' }}>
-          {shown.map((opt, slot) => (
-            <div key={slot} style={{ display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderLeft: `3px solid ${DIM_COLOR[opt.code]}`, borderRadius: 'var(--radius-lg)', padding: 18 }}>
-              <p style={{ margin: 0, fontSize: 'clamp(16px, 4.3vw, 18px)', lineHeight: 1.45, textWrap: 'pretty' }}>{opt.texte}</p>
-              <div style={{ display: 'flex', gap: 10 }}>
-                {chip(selA, slot, 0)}
-                {chip(selB, slot, 1)}
+          {shown.map((opt, slot) => {
+            const labelId = `lq-opt-${st.idx}-${slot}`;
+            return (
+              <div key={slot} role="group" aria-labelledby={labelId} style={{ display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderLeft: `3px solid ${DIM_COLOR[opt.code]}`, borderRadius: 'var(--radius-lg)', padding: 18 }}>
+                <p id={labelId} style={{ margin: 0, fontSize: 'clamp(16px, 4.3vw, 18px)', lineHeight: 1.45, textWrap: 'pretty' }}>{opt.texte}</p>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  {chip(selA, slot, 0)}
+                  {chip(selB, slot, 1)}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 40 }}>
           {st.idx > 0
             ? <button className="btn btn-ghost" onClick={() => this.back()} style={{ minHeight: 40, fontSize: 13 }}>← Question précédente</button>
             : <span />}
-          <p style={{ margin: 0, fontSize: 12, color: muted(45) }}>{waiting}</p>
+          <p role="status" style={{ margin: 0, fontSize: 12, color: muted(45) }}>{waiting}</p>
         </div>
       </div>
     );
