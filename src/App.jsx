@@ -578,12 +578,12 @@ export default class App extends React.Component {
           {st.tab === 'profils' && (
             <div style={{ display: 'grid', gap: 12 }}>
               {[0, 1].map((who) => (
-                <fieldset
+                // biome-ignore lint/a11y/useSemanticElements: carte d'affichage sans contrôle de formulaire — un <fieldset> n'y grouperait rien à remplir
+                <div
                   key={who}
+                  role="group"
                   aria-labelledby={`lq-profil-${who}`}
                   style={{
-                    margin: 0,
-                    minInlineSize: 0,
                     background: 'var(--color-surface)',
                     border: '1px solid var(--color-divider)',
                     borderRadius: 'var(--radius-lg)',
@@ -648,7 +648,7 @@ export default class App extends React.Component {
                   >
                     Contrôle : {st.answers[who].filter(Boolean).length}/30
                   </p>
-                </fieldset>
+                </div>
               ))}
             </div>
           )}
