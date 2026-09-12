@@ -260,6 +260,15 @@ describe('parcours complet', () => {
 });
 
 describe('écran de résultats', () => {
+  it('expose le groupe des onglets avec son nom accessible', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 1);
+
+    expect(screen.getByRole('group', { name: 'Vue des résultats' })).toBeInTheDocument();
+  });
+
   it('expose l’onglet actif par aria-pressed', async () => {
     const user = preparer();
     render(<App />);

@@ -567,21 +567,12 @@ export default class App extends React.Component {
           </p>
         </div>
 
-        <fieldset
-          aria-label="Vue des résultats"
-          style={{
-            display: 'flex',
-            gap: 6,
-            margin: 0,
-            padding: 0,
-            border: 'none',
-            minInlineSize: 0,
-          }}
-        >
+        {/* biome-ignore lint/a11y/useSemanticElements: trois boutons de changement de vue, pas des champs de formulaire — un <fieldset> sans contrôle dedans serait sémantiquement faux */}
+        <div role="group" aria-label="Vue des résultats" style={{ display: 'flex', gap: 6 }}>
           {tab('profils', 'Profils')}
           {tab('vigilance', 'Vigilance')}
           {tab('divergences', `Divergences (${div.length})`)}
-        </fieldset>
+        </div>
 
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {st.tab === 'profils' && (
