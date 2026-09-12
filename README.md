@@ -61,6 +61,14 @@ Deux choses à savoir :
 Biome ne formate ni le Markdown ni le YAML : ce fichier, `AGENTS.md` et
 `.github/workflows/ci.yml` restent à votre main.
 
+Une exception ciblée désactive la règle `a11y/noSvgWithoutTitle` sur
+`public/**` (voir `overrides` dans `biome.json`). Cette règle réclame un
+`<title>` à tout SVG parce qu'elle vise le SVG inséré dans un document, qu'un
+lecteur d'écran doit pouvoir annoncer — une favicon, elle, n'est jamais
+annoncée par personne. Le fichier est en plus produit par `pnpm icons` : y
+satisfaire reviendrait à faire émettre au générateur un titre que rien ne
+lira. Le formatage, lui, continue de s'appliquer à `public/`.
+
 ## Icônes et aperçu de partage
 
 L'app est faite pour vivre sur l'écran d'accueil d'un téléphone. Les icônes
