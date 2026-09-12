@@ -22,6 +22,38 @@ pnpm test:coverage  # rapport de couverture dans coverage/
 Les tests interrogent l'interface comme le ferait un lecteur d'écran
 (rôles ARIA et libellés accessibles), sans `data-testid`.
 
+## Icônes et aperçu de partage
+
+L'app est faite pour vivre sur l'écran d'accueil d'un téléphone. Les icônes
+(favicon, écran d'accueil iOS et Android, image d'aperçu quand on partage le
+lien) sortent toutes d'un même dessin : un cœur carmin en pixel art sur une
+grille 16×16, liseré d'un pixel plus rose, posé sur le bleu nuit du site.
+
+Le motif et les encodeurs vivent dans `src/icons/` (grille, rendu SVG, rendu PNG
+écrit à la main sur `zlib`) et sont couverts par des tests. `scripts/generate-icons.mjs`
+en tire les fichiers de `public/`, qui sont versionnés :
+
+```bash
+pnpm icons     # à relancer seulement si le motif ou les couleurs changent
+```
+
+Aucune dépendance n'est nécessaire pour cela : du pixel art n'étant qu'une grille
+de carrés, l'encodeur PNG tient en quelques dizaines de lignes et la CI n'a rien
+de plus à installer.
+
+Deux points à savoir avant de toucher au dessin :
+
+- **La bordure de la grille reste vide.** Le liseré est déduit du remplissage et
+  pousse vers l'extérieur ; sans cette marge, il déborderait du cadre. Un test
+  garde l'invariant.
+- **L'icône *maskable* est plus petite.** Android rogne l'icône selon la forme du
+  lanceur et ne garantit que les 80 % centraux, d'où la `coverage` réduite dans
+  le script.
+
+L'`og:image` est déclarée en URL absolue dans `index.html` : les robots des
+messageries ne résolvent pas les chemins relatifs. Si le domaine change, cette
+URL est à mettre à jour.
+
 ## Intégration continue
 
 `.github/workflows/ci.yml` rejoue `pnpm test:coverage` puis `pnpm build` sur
