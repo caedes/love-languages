@@ -2,8 +2,9 @@ import React from 'react';
 import {
   DATA, STORAGE_KEY, DIM_COLOR, DIM_NAME,
   SEL_BG, SEL_BORDER, OFF_BG, OFF_BORDER,
-  levelFor, de
+  de
 } from './questionnaire.js';
+import * as scoring from './scoring.js';
 
 const muted = (pct) => `color-mix(in srgb, var(--color-text) ${pct}%, transparent)`;
 
@@ -63,10 +64,6 @@ export default class App extends React.Component {
     return DATA.items.map(() => (Math.random() < 0.5 ? 1 : 0));
   }
 
-  names() {
-    return [this.state.nameA.trim() || 'Personne 1', this.state.nameB.trim() || 'Personne 2'];
-  }
-
   start() {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
     this.setState({ screen: 'quiz', idx: 0, answers: [[], []], order: this.makeOrders(), tab: 'profils', divIdx: 0 });
@@ -118,31 +115,11 @@ export default class App extends React.Component {
     this.setState({ answers, idx: this.state.idx - 1 });
   }
 
-  scores(who) {
-    const out = { P: 0, M: 0, C: 0, S: 0, T: 0 };
-    this.state.answers[who].forEach((code) => { if (code) out[code] += 1; });
-    return out;
-  }
-
-  profileRows(who) {
-    const s = this.scores(who);
-    return DATA.meta.dimensions
-      .map((d) => ({
-        code: d.code,
-        nom: d.nom,
-        score: s[d.code],
-        pct: Math.round((s[d.code] / DATA.meta.scoreMaxParDimension) * 100),
-        color: DIM_COLOR[d.code],
-        niveau: levelFor(s[d.code]).niveau
-      }))
-      .sort((a, b) => b.score - a.score);
-  }
-
   /** Les dimensions où l'un est en langage primaire (9-12) et l'autre en canal neutre (0-4). */
   vigilanceList() {
-    const names = this.names();
-    const a = this.scores(0);
-    const b = this.scores(1);
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
+    const a = scoring.scores(this.state.answers[0]);
+    const b = scoring.scores(this.state.answers[1]);
     const out = [];
     DATA.meta.dimensions.forEach((d) => {
       const av = a[d.code];
@@ -155,7 +132,7 @@ export default class App extends React.Component {
 
   /** Les items où les deux n'ont pas retenu la même dimension. */
   divergenceList() {
-    const names = this.names();
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
     const st = this.state;
     const out = [];
     DATA.items.forEach((item, i) => {
@@ -176,11 +153,11 @@ export default class App extends React.Component {
   }
 
   summaryText() {
-    const names = this.names();
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
     const lines = [DATA.meta.titre, ''];
     [0, 1].forEach((who) => {
       lines.push(names[who].toUpperCase());
-      this.profileRows(who).forEach((r) => {
+      scoring.profileRows(this.state.answers[who]).forEach((r) => {
         lines.push('  ' + r.score + '/12  ' + r.nom + '  (' + r.niveau + ')');
       });
       lines.push('  Total de contrôle : ' + this.state.answers[who].filter(Boolean).length + '/30');
@@ -292,7 +269,7 @@ export default class App extends React.Component {
 
   renderQuiz() {
     const st = this.state;
-    const names = this.names();
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
     const total = DATA.items.length;
     const item = DATA.items[st.idx];
     const flipped = st.order[st.idx] === 1;
@@ -350,7 +327,7 @@ export default class App extends React.Component {
 
   renderResults() {
     const st = this.state;
-    const names = this.names();
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
     const vig = this.vigilanceList();
     const div = this.divergenceList();
     const dc = div[Math.min(st.divIdx, Math.max(div.length - 1, 0))] || null;
@@ -388,7 +365,7 @@ export default class App extends React.Component {
                 <div key={who} style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-lg)', padding: '14px 16px 12px' }}>
                   <h3 style={{ fontSize: 17, margin: '0 0 12px' }}>{names[who]}</h3>
                   <div style={{ display: 'grid', gap: 11 }}>
-                    {this.profileRows(who).map((d) => (
+                    {scoring.profileRows(this.state.answers[who]).map((d) => (
                       <div key={d.code}>
                         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
                           <span style={{ fontSize: 14 }}>{d.nom}</span>
