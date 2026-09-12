@@ -392,6 +392,10 @@ export default class App extends React.Component {
       </button>
     );
 
+    // Une seule valeur pour le remplissage de la barre et pour le cœur qui la
+    // coiffe : deux arrondis séparés les désaligneraient.
+    const avancement = Math.round((st.idx / total) * 100);
+
     let waiting = '';
     if (selA !== null && selB === null) waiting = `En attente ${de(names[1])}${names[1]}`;
     else if (selB !== null && selA === null) waiting = `En attente ${de(names[0])}${names[0]}`;
@@ -431,22 +435,43 @@ export default class App extends React.Component {
               {st.idx + 1} / {total}
             </p>
           </div>
-          <div
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={total}
-            aria-valuenow={st.idx}
-            aria-valuetext={`question ${st.idx + 1} sur ${total}`}
-            style={{ height: 3, borderRadius: 2, background: muted(12), overflow: 'hidden' }}
-          >
+          {/* La barre rogne ce qui dépasse de ses trois pixels : le cœur ne peut pas
+              vivre dedans, il se pose au-dessus, dans un cadre qui ne coupe rien. */}
+          <div style={{ position: 'relative' }}>
             <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={total}
+              aria-valuenow={st.idx}
+              aria-valuetext={`question ${st.idx + 1} sur ${total}`}
+              style={{ height: 3, borderRadius: 2, background: muted(12), overflow: 'hidden' }}
+            >
+              <div
+                style={{
+                  height: '100%',
+                  width: `${avancement}%`,
+                  background: 'var(--color-accent)',
+                  transition: 'width .3s ease',
+                }}
+              />
+            </div>
+            <span
               style={{
-                height: '100%',
-                width: `${Math.round((st.idx / total) * 100)}%`,
-                background: 'var(--color-accent)',
-                transition: 'width .3s ease',
+                position: 'absolute',
+                top: '50%',
+                left: `${avancement}%`,
+                // Se décaler du même pourcentage que sa position garde le cœur
+                // dans la barre à ses deux bouts : au départ son bord gauche
+                // affleure le début, à l'arrivée son bord droit affleure la fin.
+                // Et cela sans jamais avoir à connaître sa largeur en pixels.
+                transform: `translate(-${avancement}%, -50%)`,
+                // Calé sur la transition que la barre porte déjà, pour qu'ils
+                // glissent ensemble plutôt que l'un après l'autre.
+                transition: 'left .3s ease, transform .3s ease',
               }}
-            />
+            >
+              <HeartLogo size="16px" />
+            </span>
           </div>
         </div>
 

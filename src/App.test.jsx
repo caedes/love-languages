@@ -98,11 +98,39 @@ describe('écran d’accueil', () => {
     });
   });
 
-  it('laisse le logo à l’accueil et n’encombre pas la passation', async () => {
+  /**
+   * La passation porte son propre cœur, en curseur de progression. Ce test garde
+   * l'intention d'origine — le grand logo de l'accueil ne suit pas : le seul cœur
+   * présent est celui qui est posé en absolu sur la barre.
+   */
+  it('laisse le grand logo à l’accueil, la passation n’ayant que son curseur', async () => {
     const user = preparer();
     const { container } = render(<App />);
     await demarrer(user);
-    expect(container.querySelector('svg')).not.toBeInTheDocument();
+
+    const coeurs = container.querySelectorAll('svg');
+    expect(coeurs).toHaveLength(1);
+    expect(coeurs[0].parentElement).toHaveStyle({ position: 'absolute' });
+  });
+
+  /**
+   * La barre rogne ce qui dépasse de ses 3 px : le cœur vit au-dessus d'elle,
+   * posé en pourcentage. Le décalage négatif du même pourcentage le garde dans
+   * la barre à ses deux bouts, sans jamais avoir à connaître sa largeur.
+   */
+  it('avance le cœur au rythme de la barre de progression', async () => {
+    const user = preparer();
+    const { container } = render(<App />);
+    await demarrer(user);
+
+    expect(container.querySelector('svg').parentElement).toHaveStyle({ left: '0%' });
+
+    await repondre(user, 0, 1);
+
+    expect(container.querySelector('svg').parentElement).toHaveStyle({
+      left: '3%',
+      transform: 'translate(-3%, -50%)',
+    });
   });
 
   /**
