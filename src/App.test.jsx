@@ -7,12 +7,14 @@ import { DATA } from './questionnaire.js';
 
 /**
  * user-event v14 attend des délais réels : sans `advanceTimers`, un test sous
- * fausses horloges se fige. Le stub de Math.random fixe l'ordre d'affichage
- * sur celui du JSON (0.9 >= 0.5 donc aucun item n'est inversé).
+ * fausses horloges se fige. Le stub de Math.random fixe l'ordre d'affichage :
+ * par défaut 0.9 (>= 0.5, donc aucun item n'est inversé, l'ordre reste celui du
+ * JSON) ; un appel avec 0.2 inverse l'affichage de tous les items.
+ * @param {number} valeurAleatoire valeur renvoyée par Math.random
  */
-function preparer() {
+function preparer(valeurAleatoire = 0.9) {
   vi.useFakeTimers();
-  vi.spyOn(Math, 'random').mockReturnValue(0.9);
+  vi.spyOn(Math, 'random').mockReturnValue(valeurAleatoire);
   return userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 }
 
@@ -161,6 +163,25 @@ describe('parcours complet', () => {
       expect(within(profil).getByText(texteIntegral('Cadeaux5/12'))).toBeInTheDocument();
       expect(within(profil).getByText(texteIntegral('Contact physique5/12'))).toBeInTheDocument();
       expect(within(profil).getByText(texteIntegral('Services rendus4/12'))).toBeInTheDocument();
+    });
+  });
+
+  it('attribue les points à la bonne dimension quand l’affichage est inversé', async () => {
+    const user = preparer(0.2); // makeOrders() rend 1 partout : chaque item est inversé
+    render(<App />);
+    await demarrer(user);
+    // Affichage inversé : cliquer sur le slot 0 sélectionne options[1], donc la distribution
+    // de REPONSES_SECONDE_OPTION (P:3 M:5 C:7 S:8 T:7) pour les deux participants.
+    await repondreTout(user, 0, 0);
+
+    const profilAlice = screen.getByRole('group', { name: 'Alice' });
+    const profilBob = screen.getByRole('group', { name: 'Bob' });
+    [profilAlice, profilBob].forEach((profil) => {
+      expect(within(profil).getByText(texteIntegral('Services rendus8/12'))).toBeInTheDocument();
+      expect(within(profil).getByText(texteIntegral('Cadeaux7/12'))).toBeInTheDocument();
+      expect(within(profil).getByText(texteIntegral('Contact physique7/12'))).toBeInTheDocument();
+      expect(within(profil).getByText(texteIntegral('Moments de qualité5/12'))).toBeInTheDocument();
+      expect(within(profil).getByText(texteIntegral('Paroles valorisantes3/12'))).toBeInTheDocument();
     });
   });
 
