@@ -299,6 +299,7 @@ export default class App extends React.Component {
               Effacer les réponses en cours et recommencer ?
             </p>
             <button
+              type="button"
               className="btn btn-primary btn-block"
               onClick={() => this.start()}
               style={{ minHeight: 50, fontSize: 16, margin: 0 }}
@@ -306,6 +307,7 @@ export default class App extends React.Component {
               Oui, effacer
             </button>
             <button
+              type="button"
               className="btn btn-secondary btn-block"
               onClick={() => this.setState({ confirmReset: false })}
               style={{ minHeight: 46, fontSize: 14, margin: '8px 0 0' }}
@@ -316,6 +318,7 @@ export default class App extends React.Component {
         ) : (
           <div>
             <button
+              type="button"
               className="btn btn-primary btn-block"
               onClick={() => this.askStart()}
               disabled={!st.nameA.trim() || !st.nameB.trim()}
@@ -325,6 +328,7 @@ export default class App extends React.Component {
             </button>
             {savedCount > 0 && (
               <button
+                type="button"
                 className="btn btn-secondary btn-block"
                 onClick={() => this.resume()}
                 style={{ minHeight: 46, fontSize: 14, margin: '8px 0 0' }}
@@ -494,6 +498,7 @@ export default class App extends React.Component {
           <div style={{ display: 'flex', gap: 6 }}>
             {st.idx > 0 && (
               <button
+                type="button"
                 className="btn btn-ghost"
                 onClick={() => this.back()}
                 style={{ minHeight: 40, fontSize: 13 }}
@@ -502,6 +507,7 @@ export default class App extends React.Component {
               </button>
             )}
             <button
+              type="button"
               className="btn btn-ghost"
               onClick={() => this.goHome()}
               style={{ minHeight: 40, fontSize: 13 }}
@@ -732,6 +738,7 @@ export default class App extends React.Component {
                   }}
                 >
                   <button
+                    type="button"
                     className="btn btn-secondary"
                     onClick={() =>
                       this.setState({ divIdx: (st.divIdx - 1 + div.length) % div.length })
@@ -746,6 +753,7 @@ export default class App extends React.Component {
                     {Math.min(st.divIdx, div.length - 1) + 1} / {div.length}
                   </span>
                   <button
+                    type="button"
                     className="btn btn-secondary"
                     onClick={() => this.setState({ divIdx: (st.divIdx + 1) % div.length })}
                     style={{ minHeight: 40, fontSize: 13 }}
@@ -776,6 +784,7 @@ export default class App extends React.Component {
               style={{ minHeight: 160, fontSize: 12, lineHeight: 1.45 }}
             />
             <button
+              type="button"
               className="btn btn-secondary"
               onClick={() => this.setState({ copyText: null })}
               style={{ minHeight: 40, fontSize: 13 }}
@@ -791,6 +800,7 @@ export default class App extends React.Component {
 
         <div style={{ display: 'flex', gap: 8 }}>
           <button
+            type="button"
             className="btn btn-primary"
             onClick={() => this.copy()}
             style={{ flex: 1, minHeight: 44, fontSize: 13 }}
@@ -798,6 +808,7 @@ export default class App extends React.Component {
             {st.copied ? 'Résultat copié' : 'Copier le résultat'}
           </button>
           <button
+            type="button"
             className="btn btn-secondary"
             onClick={() => this.setState({ screen: 'home', copied: false, copyText: null })}
             style={{ flex: 1, minHeight: 44, fontSize: 13 }}
