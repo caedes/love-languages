@@ -1,9 +1,10 @@
 import React from 'react';
 import {
-  DATA, STORAGE_KEY, DIM_COLOR, DIM_NAME,
+  DATA, STORAGE_KEY, DIM_COLOR,
   SEL_BG, SEL_BORDER, OFF_BG, OFF_BORDER,
-  levelFor, de
+  de
 } from './questionnaire.js';
+import * as scoring from './scoring.js';
 
 const muted = (pct) => `color-mix(in srgb, var(--color-text) ${pct}%, transparent)`;
 
@@ -58,34 +59,14 @@ export default class App extends React.Component {
     clearTimeout(this._copyTimer);
   }
 
-  /** Un ordre d'affichage tiré au sort par item, pour éviter le biais de position. */
-  makeOrders() {
-    return DATA.items.map(() => (Math.random() < 0.5 ? 1 : 0));
-  }
-
-  names() {
-    return [this.state.nameA.trim() || 'Personne 1', this.state.nameB.trim() || 'Personne 2'];
-  }
-
   start() {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
-    this.setState({ screen: 'quiz', idx: 0, answers: [[], []], order: this.makeOrders(), tab: 'profils', divIdx: 0 });
+    this.setState({ screen: 'quiz', idx: 0, answers: [[], []], order: scoring.makeOrders(), tab: 'profils', divIdx: 0 });
   }
 
   resume() {
-    const st = this.state;
-    const done = st.answers[0].filter(Boolean).length === DATA.items.length
-      && st.answers[1].filter(Boolean).length === DATA.items.length;
+    const done = scoring.passationTerminee(this.state.answers);
     this.setState({ screen: done ? 'results' : 'quiz' });
-  }
-
-  /** La position à l'écran (0 ou 1) de la dimension déjà choisie sur l'item courant. */
-  slotFor(code) {
-    const item = DATA.items[this.state.idx];
-    const flipped = this.state.order[this.state.idx] === 1;
-    const i = item.options.findIndex((o) => o.code === code);
-    if (i < 0) return null;
-    return flipped ? 1 - i : i;
   }
 
   /**
@@ -97,7 +78,7 @@ export default class App extends React.Component {
     const idx = this.state.idx;
     const item = DATA.items[idx];
     const flipped = this.state.order[idx] === 1;
-    const code = item.options[flipped ? 1 - slot : slot].code;
+    const code = scoring.codeAt(item, flipped, slot);
     const answers = this.state.answers.map((a) => a.slice());
     answers[who][idx] = code;
     this.setState({ answers });
@@ -118,94 +99,10 @@ export default class App extends React.Component {
     this.setState({ answers, idx: this.state.idx - 1 });
   }
 
-  scores(who) {
-    const out = { P: 0, M: 0, C: 0, S: 0, T: 0 };
-    this.state.answers[who].forEach((code) => { if (code) out[code] += 1; });
-    return out;
-  }
-
-  profileRows(who) {
-    const s = this.scores(who);
-    return DATA.meta.dimensions
-      .map((d) => ({
-        code: d.code,
-        nom: d.nom,
-        score: s[d.code],
-        pct: Math.round((s[d.code] / DATA.meta.scoreMaxParDimension) * 100),
-        color: DIM_COLOR[d.code],
-        niveau: levelFor(s[d.code]).niveau
-      }))
-      .sort((a, b) => b.score - a.score);
-  }
-
-  /** Les dimensions où l'un est en langage primaire (9-12) et l'autre en canal neutre (0-4). */
-  vigilanceList() {
-    const names = this.names();
-    const a = this.scores(0);
-    const b = this.scores(1);
-    const out = [];
-    DATA.meta.dimensions.forEach((d) => {
-      const av = a[d.code];
-      const bv = b[d.code];
-      if (av >= 9 && bv <= 4) out.push({ strong: names[0], weak: names[1], dim: d.nom, color: DIM_COLOR[d.code] });
-      else if (bv >= 9 && av <= 4) out.push({ strong: names[1], weak: names[0], dim: d.nom, color: DIM_COLOR[d.code] });
-    });
-    return out;
-  }
-
-  /** Les items où les deux n'ont pas retenu la même dimension. */
-  divergenceList() {
-    const names = this.names();
-    const st = this.state;
-    const out = [];
-    DATA.items.forEach((item, i) => {
-      const ca = st.answers[0][i];
-      const cb = st.answers[1][i];
-      if (!ca || !cb || ca === cb) return;
-      const ta = item.options.find((o) => o.code === ca);
-      const tb = item.options.find((o) => o.code === cb);
-      out.push({
-        id: item.id,
-        nameA: names[0], nameB: names[1],
-        dimA: DIM_NAME[ca], dimB: DIM_NAME[cb],
-        textA: ta ? ta.texte : '', textB: tb ? tb.texte : '',
-        colorA: DIM_COLOR[ca], colorB: DIM_COLOR[cb]
-      });
-    });
-    return out;
-  }
-
-  summaryText() {
-    const names = this.names();
-    const lines = [DATA.meta.titre, ''];
-    [0, 1].forEach((who) => {
-      lines.push(names[who].toUpperCase());
-      this.profileRows(who).forEach((r) => {
-        lines.push('  ' + r.score + '/12  ' + r.nom + '  (' + r.niveau + ')');
-      });
-      lines.push('  Total de contrôle : ' + this.state.answers[who].filter(Boolean).length + '/30');
-      lines.push('');
-    });
-    lines.push('POINTS DE VIGILANCE');
-    const vig = this.vigilanceList();
-    if (!vig.length) lines.push('  Aucun écart de ce type.');
-    vig.forEach((v) => {
-      lines.push('  ' + v.strong + ' a un besoin fort de ' + v.dim + ', une dimension peu sensible chez ' + v.weak + '.');
-    });
-    lines.push('');
-    const div = this.divergenceList();
-    lines.push('ITEMS DIVERGENTS (' + div.length + ')');
-    div.forEach((x) => {
-      lines.push('  Item ' + x.id);
-      lines.push('    ' + x.nameA + ' — ' + x.textA);
-      lines.push('    ' + x.nameB + ' — ' + x.textB);
-    });
-    return lines.join('\n');
-  }
-
   /** Copie la synthèse ; en cas de refus du navigateur, expose le texte à copier à la main. */
   copy() {
-    const text = this.summaryText();
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
+    const text = scoring.summaryText(this.state.answers, names);
     const done = () => {
       this.setState({ copied: true, copyText: null });
       clearTimeout(this._copyTimer);
@@ -243,7 +140,7 @@ export default class App extends React.Component {
     const doneA = st.answers[0].filter(Boolean).length;
     const doneB = st.answers[1].filter(Boolean).length;
     const savedCount = Math.min(doneA, doneB);
-    const savedDone = doneA === total && doneB === total;
+    const savedDone = scoring.passationTerminee(st.answers);
     const consignes = [
       "Chacun répond pour lui-même, sans se laisser influencer par l'autre.",
       "Le choix est binaire et obligatoire. En cas d'hésitation, tranchez pour ce qui vous manquerait le plus.",
@@ -292,21 +189,24 @@ export default class App extends React.Component {
 
   renderQuiz() {
     const st = this.state;
-    const names = this.names();
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
     const total = DATA.items.length;
     const item = DATA.items[st.idx];
     const flipped = st.order[st.idx] === 1;
     const shown = flipped ? [item.options[1], item.options[0]] : [item.options[0], item.options[1]];
-    const selA = st.answers[0][st.idx] ? this.slotFor(st.answers[0][st.idx]) : null;
-    const selB = st.answers[1][st.idx] ? this.slotFor(st.answers[1][st.idx]) : null;
+    const selA = st.answers[0][st.idx] ? scoring.slotFor(st.answers[0][st.idx], item, flipped) : null;
+    const selB = st.answers[1][st.idx] ? scoring.slotFor(st.answers[1][st.idx], item, flipped) : null;
 
     const chip = (sel, slot, who) => (
       <button
         className="lq-chip"
+        type="button"
+        aria-pressed={sel === slot}
         onClick={() => this.pick(who, slot)}
         style={{ border: `1px solid ${sel === slot ? SEL_BORDER : OFF_BORDER}`, background: sel === slot ? SEL_BG : OFF_BG }}
       >
-        {(sel === slot ? '✓ ' : '') + names[who]}
+        {sel === slot && <span aria-hidden="true">✓ </span>}
+        {names[who]}
       </button>
     );
 
@@ -318,31 +218,41 @@ export default class App extends React.Component {
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, margin: '0 0 8px' }}>
-            <p style={{ margin: 0, fontSize: 12, letterSpacing: '.08em', textTransform: 'uppercase', color: muted(55) }}>Chacun choisit sa proposition</p>
+            <h1 style={{ margin: 0, fontSize: 12, fontWeight: 400, letterSpacing: '.08em', textTransform: 'uppercase', color: muted(55) }}>Chacun choisit sa proposition</h1>
             <p style={{ margin: 0, fontSize: 13, fontVariantNumeric: 'tabular-nums', color: muted(60) }}>{st.idx + 1} / {total}</p>
           </div>
-          <div style={{ height: 3, borderRadius: 2, background: muted(12), overflow: 'hidden' }}>
+          <div
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={total}
+            aria-valuenow={st.idx}
+            aria-valuetext={`question ${st.idx + 1} sur ${total}`}
+            style={{ height: 3, borderRadius: 2, background: muted(12), overflow: 'hidden' }}
+          >
             <div style={{ height: '100%', width: `${Math.round((st.idx / total) * 100)}%`, background: 'var(--color-accent)', transition: 'width .3s ease' }} />
           </div>
         </div>
 
         <div key={st.idx} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18, animation: 'lqFade .22s ease' }}>
-          {shown.map((opt, slot) => (
-            <div key={slot} style={{ display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderLeft: `3px solid ${DIM_COLOR[opt.code]}`, borderRadius: 'var(--radius-lg)', padding: 18 }}>
-              <p style={{ margin: 0, fontSize: 'clamp(16px, 4.3vw, 18px)', lineHeight: 1.45, textWrap: 'pretty' }}>{opt.texte}</p>
-              <div style={{ display: 'flex', gap: 10 }}>
-                {chip(selA, slot, 0)}
-                {chip(selB, slot, 1)}
+          {shown.map((opt, slot) => {
+            const labelId = `lq-opt-${st.idx}-${slot}`;
+            return (
+              <div key={slot} role="group" aria-labelledby={labelId} style={{ display: 'flex', flexDirection: 'column', gap: 16, background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderLeft: `3px solid ${DIM_COLOR[opt.code]}`, borderRadius: 'var(--radius-lg)', padding: 18 }}>
+                <p id={labelId} style={{ margin: 0, fontSize: 'clamp(16px, 4.3vw, 18px)', lineHeight: 1.45, textWrap: 'pretty' }}>{opt.texte}</p>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  {chip(selA, slot, 0)}
+                  {chip(selB, slot, 1)}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 40 }}>
           {st.idx > 0
             ? <button className="btn btn-ghost" onClick={() => this.back()} style={{ minHeight: 40, fontSize: 13 }}>← Question précédente</button>
             : <span />}
-          <p style={{ margin: 0, fontSize: 12, color: muted(45) }}>{waiting}</p>
+          <p role="status" style={{ margin: 0, fontSize: 12, color: muted(45) }}>{waiting}</p>
         </div>
       </div>
     );
@@ -350,14 +260,16 @@ export default class App extends React.Component {
 
   renderResults() {
     const st = this.state;
-    const names = this.names();
-    const vig = this.vigilanceList();
-    const div = this.divergenceList();
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
+    const vig = scoring.vigilanceList(st.answers, names);
+    const div = scoring.divergenceList(st.answers, names);
     const dc = div[Math.min(st.divIdx, Math.max(div.length - 1, 0))] || null;
 
     const tab = (name, label) => (
       <button
         className="lq-tab"
+        type="button"
+        aria-pressed={st.tab === name}
         onClick={() => this.setState({ tab: name })}
         style={{
           border: `1px solid ${st.tab === name ? 'var(--color-accent-600)' : 'var(--color-divider)'}`,
@@ -375,7 +287,7 @@ export default class App extends React.Component {
           <p style={{ fontSize: 12.5, color: muted(58), margin: 0 }}>Scores sur 12, 30 choix répartis entre les cinq dimensions.</p>
         </div>
 
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div role="group" aria-label="Vue des résultats" style={{ display: 'flex', gap: 6 }}>
           {tab('profils', 'Profils')}
           {tab('vigilance', 'Vigilance')}
           {tab('divergences', `Divergences (${div.length})`)}
@@ -385,10 +297,10 @@ export default class App extends React.Component {
           {st.tab === 'profils' && (
             <div style={{ display: 'grid', gap: 12 }}>
               {[0, 1].map((who) => (
-                <div key={who} style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-lg)', padding: '14px 16px 12px' }}>
-                  <h3 style={{ fontSize: 17, margin: '0 0 12px' }}>{names[who]}</h3>
+                <div key={who} role="group" aria-labelledby={`lq-profil-${who}`} style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-lg)', padding: '14px 16px 12px' }}>
+                  <h3 id={`lq-profil-${who}`} style={{ fontSize: 17, margin: '0 0 12px' }}>{names[who]}</h3>
                   <div style={{ display: 'grid', gap: 11 }}>
-                    {this.profileRows(who).map((d) => (
+                    {scoring.profileRows(this.state.answers[who]).map((d) => (
                       <div key={d.code}>
                         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
                           <span style={{ fontSize: 14 }}>{d.nom}</span>
@@ -457,10 +369,12 @@ export default class App extends React.Component {
         {st.copyText && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <p style={{ margin: 0, fontSize: 12, color: muted(60) }}>Copie automatique refusée par le navigateur. Sélectionnez le texte ci-dessous puis copiez-le.</p>
-            <textarea className="input" readOnly value={st.copyText} onFocus={(e) => e.target.select()} style={{ minHeight: 160, fontSize: 12, lineHeight: 1.45 }} />
+            <textarea className="input" readOnly aria-label="Synthèse à copier manuellement" value={st.copyText} onFocus={(e) => e.target.select()} style={{ minHeight: 160, fontSize: 12, lineHeight: 1.45 }} />
             <button className="btn btn-secondary" onClick={() => this.setState({ copyText: null })} style={{ minHeight: 40, fontSize: 13 }}>Fermer</button>
           </div>
         )}
+
+        <p role="status" className="sr-only">{st.copied ? 'Résultat copié dans le presse-papiers' : ''}</p>
 
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-primary" onClick={() => this.copy()} style={{ flex: 1, minHeight: 44, fontSize: 13 }}>{st.copied ? 'Résultat copié' : 'Copier le résultat'}</button>
