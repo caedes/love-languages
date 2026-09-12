@@ -1,7 +1,7 @@
 # Formatage et lint avec Biome, posés par un hook de pre-commit
 
 - **Date** : 2026-09-12
-- **Statut** : design validé, prêt pour le plan d'implémentation
+- **Statut** : implémenté — voir « Amendements décidés à l'implémentation » en fin de document
 - **Issue** : [#5 — Biome JS](https://github.com/caedes/love-languages/issues/5)
 - **Périmètre** : installation de Biome 2.5.13 (formateur + linter), mise en
   conformité du dépôt, hook de pre-commit husky, gate CI, documentation.
@@ -25,7 +25,7 @@ ci-dessous. Ces chiffres fondent le découpage de la migration :
 
 | passe | diagnostics restants |
 | --- | --- |
-| état actuel | 69 (51 erreurs, 7 avertissements, 11 infos) |
+| état actuel | 70 (52 erreurs, 7 avertissements, 11 infos) |
 | après `check --write` (correctifs sûrs) | 39 |
 | après `check --write --unsafe` | 22, toutes à trancher à la main |
 
@@ -82,10 +82,11 @@ Deux devDependencies, et rien d'autre :
 {
   "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": { "includes": ["**", "!public/favicon.svg"] },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "javascript": { "formatter": { "quoteStyle": "single" } },
   "css": { "formatter": { "quoteStyle": "single" } },
-  "linter": { "enabled": true, "rules": { "recommended": true } }
+  "linter": { "enabled": true, "rules": { "preset": "recommended" } }
 }
 ```
 
@@ -231,3 +232,59 @@ les espaces, cela se vérifie au lieu de se supposer.
 6. Un clone neuf suivi de `pnpm install` dispose du hook actif.
 7. Le README explique les commandes, la limite du `git add -p` et la
    configuration de `blame.ignoreRevsFile`.
+
+
+## Amendements décidés à l'implémentation
+
+Le design ci-dessus a tenu dans ses grandes lignes. Six points ont été tranchés
+en cours de route, chacun parce que l'exécution a révélé ce que la conception
+n'avait pas vu. Ils sont consignés ici pour que le document reste vrai.
+
+**1. `public/favicon.svg` sort du périmètre de Biome.** La mesure préalable avait
+été faite sur une copie du dépôt sans `public/`, et manquait donc deux
+diagnostics. L'un, `a11y/noSvgWithoutTitle`, réclame un `<title>` à la favicon —
+or ce fichier est *produit* par `pnpm icons`. Un formateur qui réécrit la sortie
+d'un générateur rend la CI rouge à la prochaine régénération légitime. Le
+générateur, lui, reste intégralement linté. `public/site.webmanifest`, écrit à la
+main, reste dans le périmètre.
+
+**2. Le champ `linter.rules.recommended` cède la place à `preset`.** Biome le
+signale comme déprécié et voué à disparaître à la prochaine majeure. Laissé tel
+quel, ce diagnostic aurait été permanent : il rendait inatteignable le « zéro
+diagnostic » et aurait fait échouer la gate de CI. Le jeu de règles est
+strictement identique sous les deux formes, ce qui a été vérifié.
+
+**3. Les guillemets du CSS et l'éclatement du JSON** ont été tranchés avant le
+plan et figurent déjà dans le tableau des décisions.
+
+**4. Un des trois `role="group"` n'est pas devenu un `<fieldset>`.** Celui qui
+groupe les trois boutons de changement de vue des résultats est revenu à un
+`<div role="group">`, avec la règle neutralisée localement et la raison écrite
+sur la ligne. Un `fieldset` sémantise « un ensemble de champs de formulaire
+liés » ; ce bloc ne contient aucun champ. La substitution n'apportait aucun gain
+d'accessibilité — elle faisait taire le linter au prix de quatre neutralisations
+de styles par défaut — et un `fieldset` vide de tout contrôle est de nature à
+déclencher un signalement axe ou Lighthouse. Le même raisonnement que celui qui
+avait fait écarter `role="tab"` dans le design précédent : un contrat
+d'accessibilité mal tenu vaut moins que pas de contrat du tout. Les deux autres
+sites gardent leur `<fieldset>`, ce sont de vrais regroupements de contrôles.
+
+**5. Un test a été ajouté.** La suite comptait 99 tests, elle en compte 100. La
+relecture a établi que le groupe « Vue des résultats » n'était interrogé par
+aucun test : les tests touchant aux onglets traversaient ce nœud pour atteindre
+les boutons sans jamais le vérifier. Une faute de frappe sur son `aria-label`
+serait passée au vert. C'est la seule entorse à la règle « aucun test modifié » —
+et c'est un ajout, aucun test existant n'a bougé.
+
+**6. Précision sur la limite du `git add -p`.** La section « Limite connue » a été
+reformulée : `git update-index --again` réindexe tout chemin déjà indexé qui
+diffère de `HEAD`, que Biome l'ait corrigé ou non. Un fichier partiellement
+indexé fuite donc même quand le formateur ne l'a pas touché.
+
+### Ce qui reste à vérifier par un humain
+
+Aucun contrôle visuel n'a été fait. Les tests voient les rôles et les libellés
+accessibles, pas les styles par défaut du navigateur. Trois écrans méritent un
+coup d'œil avant le merge : les deux propositions d'un item (le `min-inline-size`
+d'un `fieldset` se manifeste surtout au redimensionnement), les cartes de profil
+(bordure et arrondi), et les trois onglets de résultats.
