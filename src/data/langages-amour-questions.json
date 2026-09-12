@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "titre": "Les 5 langages de l'amour — questionnaire à choix forcés",
+    "nombreItems": 30,
+    "scoreMaxParDimension": 12,
+    "dimensions": [
+      { "code": "P", "nom": "Paroles valorisantes" },
+      { "code": "M", "nom": "Moments de qualité" },
+      { "code": "C", "nom": "Cadeaux" },
+      { "code": "S", "nom": "Services rendus" },
+      { "code": "T", "nom": "Contact physique" }
+    ],
+    "interpretation": [
+      { "min": 9, "max": 12, "niveau": "Langage primaire", "description": "Besoin impérieux, canal d'alerte sous stress." },
+      { "min": 6, "max": 8, "niveau": "Langage secondaire", "description": "Très apprécié, canal de soutien." },
+      { "min": 5, "max": 5, "niveau": "Canal intermédiaire", "description": "Sensibilité modérée." },
+      { "min": 0, "max": 4, "niveau": "Canal neutre", "description": "Sensibilité faible, risque d'incompréhension si le partenaire a un score élevé sur cette dimension." }
+    ]
+  },
+  "items": [
+    { "id": 1, "options": [
+      { "code": "P", "texte": "J'aime recevoir des compliments sincères et des encouragements." },
+      { "code": "T", "texte": "J'aime qu'on me prenne spontanément dans les bras ou qu'on me tienne la main." }
+    ]},
+    { "id": 2, "options": [
+      { "code": "M", "texte": "J'apprécie qu'on passe un moment seul à seul, sans interruptions ni distractions." },
+      { "code": "S", "texte": "J'apprécie quand mon/ma partenaire m'aide sur une tâche pénible sans que j'aie à demander." }
+    ]},
+    { "id": 3, "options": [
+      { "code": "C", "texte": "J'aime recevoir un petit cadeau ou une attention matérielle inattendue." },
+      { "code": "M", "texte": "J'aime qu'on parte faire une balade ou une activité rien que tous les deux." }
+    ]},
+    { "id": 4, "options": [
+      { "code": "S", "texte": "Je me sens aimé(e) quand mon/ma partenaire résout un problème pratique pour m'alléger." },
+      { "code": "T", "texte": "Je me sens aimé(e) quand mon/ma partenaire pose sa main sur mon épaule ou m'embrasse." }
+    ]},
+    { "id": 5, "options": [
+      { "code": "T", "texte": "Les gestes de tendresse physique au quotidien sont essentiels pour mon bien-être." },
+      { "code": "C", "texte": "Trouver un objet ou une surprise que l'autre a déniché pour moi me touche profondément." }
+    ]},
+    { "id": 6, "options": [
+      { "code": "M", "texte": "J'aime partager un projet ou une activité nouvelle avec mon/ma partenaire." },
+      { "code": "P", "texte": "J'aime qu'on me dise explicitement ce qu'on apprécie dans ma façon d'être." }
+    ]},
+    { "id": 7, "options": [
+      { "code": "C", "texte": "Un cadeau préparé avec soin me prouve que l'autre pense à moi en mon absence." },
+      { "code": "S", "texte": "Voir mon/ma partenaire prendre en charge une corvée domestique me prouve son engagement." }
+    ]},
+    { "id": 8, "options": [
+      { "code": "P", "texte": "Entendre des félicitations après une réussite ou un effort me donne de l'énergie." },
+      { "code": "C", "texte": "Recevoir un cadeau symbolique pour marquer une occasion a beaucoup de valeur pour moi." }
+    ]},
+    { "id": 9, "options": [
+      { "code": "M", "texte": "Passer une soirée à discuter en profondeur sans regarder l'heure est ma priorité." },
+      { "code": "C", "texte": "Recevoir une attention matérielle choisie sur mesure est ma priorité." }
+    ]},
+    { "id": 10, "options": [
+      { "code": "P", "texte": "Un mot doux laissé par écrit ou un message dans la journée éclaire mon quotidien." },
+      { "code": "S", "texte": "Savoir que l'autre m'évite une complication logistique éclaire mon quotidien." }
+    ]},
+    { "id": 11, "options": [
+      { "code": "P", "texte": "Les paroles de reconnaissance verbale me touchent droit au cœur." },
+      { "code": "M", "texte": "L'attention exclusive de l'autre pendant un échange me touche droit au cœur." }
+    ]},
+    { "id": 12, "options": [
+      { "code": "S", "texte": "Une action concrète pour me faciliter la vie me réconforte plus que de longs discours." },
+      { "code": "T", "texte": "Un contact physique apaisant me réconforte plus que de longs discours." }
+    ]},
+    { "id": 13, "options": [
+      { "code": "P", "texte": "J'ai besoin qu'on me verbalise souvent de l'amour ou de la fierté." },
+      { "code": "C", "texte": "J'ai besoin de marques tangibles (souvenirs, cadeaux) qui matérialisent le lien." }
+    ]},
+    { "id": 14, "options": [
+      { "code": "M", "texte": "Être ensemble, même sans rien faire de spécial, me ressource pleinement." },
+      { "code": "T", "texte": "La proximité corporelle et les câlins réguliers me ressourcent pleinement." }
+    ]},
+    { "id": 15, "options": [
+      { "code": "P", "texte": "Savoir que mes compétences et mes efforts sont reconnus me valorise." },
+      { "code": "S", "texte": "Sentir qu'on forme une équipe opérationnelle face aux aléas de la vie me valorise." }
+    ]},
+    { "id": 16, "options": [
+      { "code": "T", "texte": "Marcher main dans la main ou être assis tout près me fait me sentir complice." },
+      { "code": "M", "texte": "Échanger sur nos idées et nos ressentis sans filtre me fait me sentir complice." }
+    ]},
+    { "id": 17, "options": [
+      { "code": "C", "texte": "Découvrir que l'autre a fait l'effort de m'acheter ou me fabriquer quelque chose me comble." },
+      { "code": "S", "texte": "Découvrir que l'autre a fait une corvée pour m'épargner de la fatigue me comble." }
+    ]},
+    { "id": 18, "options": [
+      { "code": "P", "texte": "Des compliments sur mon allure ou mes actions me rassurent sur l'attachement de l'autre." },
+      { "code": "T", "texte": "Le contact physique spontané (caresse, baiser volé) me rassure sur l'attachement de l'autre." }
+    ]},
+    { "id": 19, "options": [
+      { "code": "M", "texte": "Bloquer du temps dédié dans l'agenda rien que pour nous deux est capital." },
+      { "code": "S", "texte": "Se relayer efficacement dans les tâches du foyer est capital." }
+    ]},
+    { "id": 20, "options": [
+      { "code": "C", "texte": "J'accorde une importance sentimentale aux objets offerts lors des dates clés." },
+      { "code": "T", "texte": "J'accorde une importance primordiale à l'intimité corporelle et au contact physique." }
+    ]},
+    { "id": 21, "options": [
+      { "code": "M", "texte": "Ce qui me manque le plus quand on est occupés, c'est l'écoute et le temps à deux." },
+      { "code": "T", "texte": "Ce qui me manque le plus quand on est occupés, c'est la tendresse et le contact tactile." }
+    ]},
+    { "id": 22, "options": [
+      { "code": "P", "texte": "Les encouragements dans mes moments de doute sont ce dont j'ai le plus besoin." },
+      { "code": "S", "texte": "Un coup de main pratique dans mes moments de surcharge est ce dont j'ai le plus besoin." }
+    ]},
+    { "id": 23, "options": [
+      { "code": "C", "texte": "Recevoir un souvenir de voyage que l'autre m'a rapporté me rend heureux/se." },
+      { "code": "M", "texte": "Partir ensemble en week-end ou en escapade me rend heureux/se." }
+    ]},
+    { "id": 24, "options": [
+      { "code": "T", "texte": "Une étreinte chaleureuse lorsque nous nous retrouvons après une journée dense." },
+      { "code": "P", "texte": "Un compliment sincère ou un mot d'accueil chaleureux lors de nos retrouvailles." }
+    ]},
+    { "id": 25, "options": [
+      { "code": "S", "texte": "Voir mon/ma partenaire réparer, ranger ou cuisiner pour nous m'émeut." },
+      { "code": "C", "texte": "Voir mon/ma partenaire m'offrir quelque chose qui lui a demandé du temps de recherche m'émeut." }
+    ]},
+    { "id": 26, "options": [
+      { "code": "M", "texte": "Partager un loisir ou un centre d'intérêt commun renforce mon sentiment d'amour." },
+      { "code": "P", "texte": "Entendre des paroles d'admiration sur ma personnalité renforce mon sentiment d'amour." }
+    ]},
+    { "id": 27, "options": [
+      { "code": "T", "texte": "Un massage ou un geste doux après une journée épuisante est la meilleure preuve d'affection." },
+      { "code": "S", "texte": "Prendre le relais sur le dîner ou l'intendance après une journée épuisante est la meilleure preuve d'affection." }
+    ]},
+    { "id": 28, "options": [
+      { "code": "P", "texte": "Les remerciements explicites pour ce que j'apporte à notre vie commune me portent." },
+      { "code": "C", "texte": "Les petites attentions matérielles surprises au quotidien me portent." }
+    ]},
+    { "id": 29, "options": [
+      { "code": "S", "texte": "Un soutien actif et direct dans mes projets me donne des ailes." },
+      { "code": "M", "texte": "Une écoute patiente et attentive de mes projets me donne des ailes." }
+    ]},
+    { "id": 30, "options": [
+      { "code": "T", "texte": "La complicité physique et le toucher régulier soudent notre couple." },
+      { "code": "C", "texte": "Le soin apporté à m'offrir des cadeaux personnalisés soude notre couple." }
+    ]}
+  ]
+}
