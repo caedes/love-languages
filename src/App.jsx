@@ -270,6 +270,8 @@ export default class App extends React.Component {
     const tab = (name, label) => (
       <button
         className="lq-tab"
+        type="button"
+        aria-pressed={st.tab === name}
         onClick={() => this.setState({ tab: name })}
         style={{
           border: `1px solid ${st.tab === name ? 'var(--color-accent-600)' : 'var(--color-divider)'}`,
@@ -287,7 +289,7 @@ export default class App extends React.Component {
           <p style={{ fontSize: 12.5, color: muted(58), margin: 0 }}>Scores sur 12, 30 choix répartis entre les cinq dimensions.</p>
         </div>
 
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div role="group" aria-label="Vue des résultats" style={{ display: 'flex', gap: 6 }}>
           {tab('profils', 'Profils')}
           {tab('vigilance', 'Vigilance')}
           {tab('divergences', `Divergences (${div.length})`)}
@@ -369,10 +371,12 @@ export default class App extends React.Component {
         {st.copyText && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <p style={{ margin: 0, fontSize: 12, color: muted(60) }}>Copie automatique refusée par le navigateur. Sélectionnez le texte ci-dessous puis copiez-le.</p>
-            <textarea className="input" readOnly value={st.copyText} onFocus={(e) => e.target.select()} style={{ minHeight: 160, fontSize: 12, lineHeight: 1.45 }} />
+            <textarea className="input" readOnly aria-label="Synthèse à copier manuellement" value={st.copyText} onFocus={(e) => e.target.select()} style={{ minHeight: 160, fontSize: 12, lineHeight: 1.45 }} />
             <button className="btn btn-secondary" onClick={() => this.setState({ copyText: null })} style={{ minHeight: 40, fontSize: 13 }}>Fermer</button>
           </div>
         )}
+
+        <p role="status" className="sr-only">{st.copied ? 'Résultat copié dans le presse-papiers' : ''}</p>
 
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-primary" onClick={() => this.copy()} style={{ flex: 1, minHeight: 44, fontSize: 13 }}>{st.copied ? 'Résultat copié' : 'Copier le résultat'}</button>

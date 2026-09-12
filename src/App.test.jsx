@@ -160,6 +160,55 @@ describe('parcours complet', () => {
   });
 });
 
+describe('écran de résultats', () => {
+  it('expose l’onglet actif par aria-pressed', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 1);
+
+    expect(screen.getByRole('button', { name: 'Profils' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Vigilance' })).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(screen.getByRole('button', { name: 'Vigilance' }));
+    expect(screen.getByRole('button', { name: 'Vigilance' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Profils' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('annonce la copie réussie de la synthèse', async () => {
+    const user = preparer();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 1);
+    await user.click(screen.getByRole('button', { name: 'Copier le résultat' }));
+
+    expect(writeText).toHaveBeenCalledOnce();
+    expect(writeText.mock.calls[0][0]).toContain('ALICE');
+    expect(await screen.findByRole('status')).toHaveTextContent('Résultat copié');
+  });
+
+  it('propose une copie manuelle quand le navigateur refuse', async () => {
+    const user = preparer();
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockRejectedValue(new Error('refus')) },
+      configurable: true
+    });
+    // jsdom n'implémente pas execCommand : on le rend explicitement infructueux.
+    document.execCommand = vi.fn(() => false);
+
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 1);
+    await user.click(screen.getByRole('button', { name: 'Copier le résultat' }));
+
+    const zone = await screen.findByLabelText('Synthèse à copier manuellement');
+    expect(zone.value).toContain('ALICE');
+  });
+});
+
 describe('persistance locale', () => {
   it('reprend à la question en cours après un remontage', async () => {
     const user = preparer();
