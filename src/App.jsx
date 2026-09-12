@@ -299,8 +299,8 @@ export default class App extends React.Component {
           {st.tab === 'profils' && (
             <div style={{ display: 'grid', gap: 12 }}>
               {[0, 1].map((who) => (
-                <div key={who} style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-lg)', padding: '14px 16px 12px' }}>
-                  <h3 style={{ fontSize: 17, margin: '0 0 12px' }}>{names[who]}</h3>
+                <div key={who} role="group" aria-labelledby={`lq-profil-${who}`} style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-lg)', padding: '14px 16px 12px' }}>
+                  <h3 id={`lq-profil-${who}`} style={{ fontSize: 17, margin: '0 0 12px' }}>{names[who]}</h3>
                   <div style={{ display: 'grid', gap: 11 }}>
                     {scoring.profileRows(this.state.answers[who]).map((d) => (
                       <div key={d.code}>

@@ -37,6 +37,15 @@ async function repondreTout(user, slotAlice, slotBob) {
   }
 }
 
+/**
+ * Matcher `getByText` pour un texte réparti entre plusieurs éléments (nom de
+ * dimension et score dans des `<span>` distincts, phrase de vigilance avec
+ * `<strong>`/`<em>`) : compare le texte intégral de l'élément, espaces normalisés.
+ */
+function texteIntegral(attendu) {
+  return (_, element) => element.textContent.replace(/\s+/g, ' ').trim() === attendu;
+}
+
 beforeEach(() => { window.localStorage.clear(); });
 afterEach(() => { vi.useRealTimers(); });
 
@@ -143,8 +152,16 @@ describe('parcours complet', () => {
     expect(screen.getByRole('heading', { name: 'Alice' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Bob' })).toBeInTheDocument();
     // Toujours la première proposition : P=9, M=7, C=5, S=4, T=5, pour chacun.
-    expect(screen.getAllByText('9/12')).toHaveLength(2);
-    expect(screen.getAllByText('4/12')).toHaveLength(2);
+    // On vérifie que chaque score est bien rattaché à sa dimension, pour la bonne personne.
+    const profilAlice = screen.getByRole('group', { name: 'Alice' });
+    const profilBob = screen.getByRole('group', { name: 'Bob' });
+    [profilAlice, profilBob].forEach((profil) => {
+      expect(within(profil).getByText(texteIntegral('Paroles valorisantes9/12'))).toBeInTheDocument();
+      expect(within(profil).getByText(texteIntegral('Moments de qualité7/12'))).toBeInTheDocument();
+      expect(within(profil).getByText(texteIntegral('Cadeaux5/12'))).toBeInTheDocument();
+      expect(within(profil).getByText(texteIntegral('Contact physique5/12'))).toBeInTheDocument();
+      expect(within(profil).getByText(texteIntegral('Services rendus4/12'))).toBeInTheDocument();
+    });
   });
 
   it('relève la vigilance et les divergences quand les choix s’opposent', async () => {
@@ -154,7 +171,11 @@ describe('parcours complet', () => {
     await repondreTout(user, 0, 1);
 
     await user.click(screen.getByRole('button', { name: 'Vigilance' }));
-    expect(screen.getByText(/Paroles valorisantes/)).toBeInTheDocument();
+    // Alice choisit toujours la première proposition (P=9, langage primaire),
+    // Bob toujours la seconde (P=3, canal neutre) : c'est bien Alice le besoin fort.
+    expect(screen.getByText(texteIntegral(
+      'Alice a un besoin fort de Paroles valorisantes, une dimension peu sensible chez Bob.'
+    ), { selector: 'p' })).toBeInTheDocument();
 
     expect(screen.getByRole('button', { name: 'Divergences (30)' })).toBeInTheDocument();
   });
