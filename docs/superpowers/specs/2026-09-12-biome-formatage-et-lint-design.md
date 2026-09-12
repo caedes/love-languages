@@ -34,7 +34,7 @@ analysée : c'est de lui que Biome déduit les *domains* React et Vitest, donc
 l'activation de règles comme `noArrayIndexKey`. Une mesure faite sur une copie
 partielle les sous-estime.
 
-Le formatage seul pèse ~1 900 lignes de diff sur 19 fichiers, dont 526 pour
+Le formatage seul pèse ~1 900 lignes de diff sur vingt fichiers, dont 526 pour
 `src/data/langages-amour-questions.json` et 480 pour `src/styles/nocturne.css`.
 
 Les 22 irréductibles, après examen des sites concernés :
@@ -168,12 +168,15 @@ sans accents dans ce dépôt : la convention est conservée.
 
 ## Section 4 — La migration
 
-Une pull request sur la branche `biome-js`, 27 commits.
+Une pull request sur la branche `biome-js`. La migration proprement dite tient
+en onze commits, décrits ci-dessous ; la branche en porte davantage, les
+relectures ayant donné lieu à des correctifs et les documents de conception
+ayant été amendés au fil des défauts trouvés.
 
 | # | commit | contenu |
 | --- | --- | --- |
 | 1 | `chore: 🤖 ajoute Biome et sa configuration` | `biome.json`, la devDependency, les trois scripts. Aucun fichier source touché. |
-| 2 | `chore: 🤖 applique le formatage Biome au dépôt` | `biome format --write` seul. ~1 900 lignes, 19 fichiers, purement mécanique. |
+| 2 | `chore: 🤖 applique le formatage Biome au dépôt` | `biome format --write` seul. ~1 900 lignes, vingt fichiers, purement mécanique. |
 | 3 | `chore: 🤖 applique les correctifs sûrs et trie les imports` | `biome check --write`. Petit diff. |
 | 4 | `refactor: 💡 supprime le code mort et simplifie les concaténations` | Les 26 correctifs *unsafe* — `noUnusedVariables` ×4, `noUnusedImports` ×2, `useTemplate` ×9, `useOptionalChain` ×1 et leurs suites — appliqués puis relus un par un. |
 | 5 | `refactor: 💡 ferme les callbacks forEach imbriqués` | Les 5 jeux d'accolades. |
