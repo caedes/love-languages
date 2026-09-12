@@ -164,12 +164,23 @@ le fichier passe de 142 à 420 lignes — décision actée dans le spec) et
 
 - [ ] **Step 3 : Vérifier qu'aucune chaîne de caractères n'a changé**
 
-Run: `git diff --ignore-all-space --stat -- src/data/langages-amour-questions.json`
+Un formateur ne réécrit pas de contenu. Le prouver plutôt que de le croire,
+en comparant les deux versions **une fois analysées** :
 
-Expected: le fichier apparaît (l'indentation a changé), mais en ouvrant le diff
-aucune valeur `"texte"`, `"code"`, `"niveau"` ou `"description"` ne doit être
-modifiée — seuls la disposition et l'indentation bougent. Un formateur ne
-réécrit pas de contenu ; si une chaîne diffère, arrêter et investiguer.
+```bash
+git show HEAD:src/data/langages-amour-questions.json > /tmp/lq-avant.json
+node -e "
+const a = require('/tmp/lq-avant.json');
+const b = require('$PWD/src/data/langages-amour-questions.json');
+require('node:assert').deepStrictEqual(a, b);
+console.log('JSON identique :', b.items.length, 'items,', b.meta.dimensions.length, 'dimensions');
+"
+rm /tmp/lq-avant.json
+```
+
+Expected: `JSON identique : 30 items, 5 dimensions`. Si `deepStrictEqual` lève,
+une valeur a changé — arrêter et investiguer, ce serait un défaut du formateur
+et non une étape à forcer.
 
 - [ ] **Step 4 : Lancer la suite de tests**
 
@@ -557,7 +568,13 @@ git commit -m "fix: 🐛 type explicite sur les boutons"
 ### Task 7 : Clés stables sur les listes calculées
 
 **Files:**
-- Modify: `src/App.jsx:246`, `src/App.jsx:450`, `src/App.jsx:669`
+- Modify: `src/App.jsx`, trois sites — aux alentours des lignes 246, 454 et 675
+
+> **Les numéros de ligne ont dérivé.** Ils valaient 246, 450 et 669 juste après
+> la tâche 2 ; la tâche 6 a depuis inséré onze lignes dans le même fichier, qui
+> décalent les deux derniers de 4 et 6 lignes. Localisez chaque site par le code
+> cité dans les diffs ci-dessous, pas par son numéro. Le contrôle de fin de
+> tâche (3 diagnostics restants) confirmera que vous avez visé juste.
 
 **Interfaces:**
 - Consumes: le dépôt de la tâche 6, et les formes de données produites par
@@ -570,7 +587,7 @@ recalculée et peut changer d'ordre ou de longueur, React réutilise alors le
 mauvais nœud. Les trois listes concernées sont toutes recalculées à chaque
 rendu.
 
-- [ ] **Step 1 : `src/App.jsx:246` — les consignes**
+- [ ] **Step 1 : les consignes** (`consignes.map`, vers la ligne 246)
 
 `consignes` est un tableau de trois chaînes distinctes, défini juste au-dessus.
 La chaîne elle-même est l'identité.
@@ -582,7 +599,7 @@ La chaîne elle-même est l'identité.
 +            <div key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
 ```
 
-- [ ] **Step 2 : `src/App.jsx:450` — les deux propositions d'un item**
+- [ ] **Step 2 : les deux propositions d'un item** (`shown.map`, vers la ligne 454)
 
 `shown` contient les deux options de l'item courant, dans un ordre tiré au sort
 à chaque item. Leurs `code` sont distincts — c'est un invariant du jeu de
@@ -603,7 +620,7 @@ Ne pas le retirer de la signature.
                  role="group"
 ```
 
-- [ ] **Step 3 : `src/App.jsx:669` — les points de vigilance**
+- [ ] **Step 3 : les points de vigilance** (`vig.map`, vers la ligne 675)
 
 `vig` vient de `scoring.vigilanceList(...)`, qui parcourt
 `DATA.meta.dimensions` et pousse **au plus un objet par dimension**. Le champ
@@ -642,7 +659,13 @@ git commit -m "fix: 🐛 clés stables sur les listes calculées"
 ### Task 8 : Balises sémantiques à la place des rôles ARIA
 
 **Files:**
-- Modify: `src/App.jsx:451`, `src/App.jsx:563`, `src/App.jsx:575`
+- Modify: `src/App.jsx`, trois sites — aux alentours des lignes 455, 569 et 581
+
+> **Les numéros de ligne ont dérivé.** Ils valaient 451, 563 et 575 juste après
+> la tâche 2 ; les onze lignes insérées par la tâche 6 les décalent de 4 et 6
+> lignes. Localisez chaque site par son attribut `role="group"` et le code cité
+> dans les diffs, pas par son numéro. Il n'y a que trois `role="group"` dans le
+> fichier : `grep -n 'role="group"' src/App.jsx` les donne tous les trois.
 
 **Interfaces:**
 - Consumes: le dépôt de la tâche 7.
@@ -671,7 +694,7 @@ pnpm test:run 2>&1 | tail -5
 
 Expected: PASS. Conserver le total affiché.
 
-- [ ] **Step 2 : `src/App.jsx:451` — le bloc d'une proposition**
+- [ ] **Step 2 : le bloc d'une proposition** (`aria-labelledby={labelId}`, vers la ligne 455)
 
 ```diff
              return (
@@ -694,7 +717,7 @@ appliquent aux `fieldset` et qui l'empêche de rétrécir dans un conteneur flex
 Le `border` et le `padding` sont déjà fixés explicitement par le `style`
 existant : ne pas les redéclarer.
 
-- [ ] **Step 3 : `src/App.jsx:563` — le groupe d'onglets de résultats**
+- [ ] **Step 3 : le groupe d'onglets de résultats** (`aria-label="Vue des résultats"`, vers la ligne 569)
 
 ```diff
 -        <div role="group" aria-label="Vue des résultats" style={{ display: 'flex', gap: 6 }}>
@@ -713,7 +736,7 @@ Ici le `style` d'origine ne fixait ni bordure ni remplissage : les trois défaut
 (`margin`, `padding`, `border`) doivent être annulés, sans quoi une bordure
 grise apparaît autour des trois onglets.
 
-- [ ] **Step 4 : `src/App.jsx:575` — la carte de profil d'un participant**
+- [ ] **Step 4 : la carte de profil d'un participant** (`lq-profil-`, vers la ligne 581)
 
 ```diff
                {[0, 1].map((who) => (
@@ -874,21 +897,27 @@ husky et le hook sont déjà dans le commit du Step 4.
 
 - [ ] **Step 8 : Vérifier qu'un clone neuf reçoit le hook**
 
-```bash
-cd "$(mktemp -d)"
-git clone --branch biome-js "$OLDPWD/.git" sonde-clone 2>/dev/null || git clone --branch biome-js "$(git -C "$OLDPWD" rev-parse --git-common-dir)" sonde-clone
-cd sonde-clone && pnpm install --frozen-lockfile && git config --get core.hooksPath
-```
-
-Expected: `pnpm install` déclenche `prepare`, et `git config --get core.hooksPath`
-répond `.husky/_`. C'est ce qui garantit qu'un poste neuf est protégé sans geste
-manuel.
-
-Puis revenir au dépôt et supprimer le clone :
+Le hook ne sert à rien s'il faut un geste manuel pour l'activer. Vérifier qu'un
+`pnpm install` suffit, dans un clone jetable et avec des chemins absolus :
 
 ```bash
-cd "$OLDPWD" && rm -rf "$(dirname "$PWD")/sonde-clone"
+DEPOT="$(pwd)"
+CLONE="$(mktemp -d)/clone"
+git clone --branch biome-js --single-branch "$DEPOT" "$CLONE"
+(cd "$CLONE" && pnpm install --frozen-lockfile && git config --get core.hooksPath)
 ```
+
+Expected: la dernière commande affiche `.husky/_`. C'est `prepare` qui l'a posé
+pendant l'installation — donc un poste neuf est protégé sans rien faire de plus.
+
+Puis supprimer le clone :
+
+```bash
+rm -rf "$(dirname "$CLONE")"
+cd "$DEPOT" && git status --short
+```
+
+Expected: arbre propre.
 
 ### Task 10 : La gate CI
 
