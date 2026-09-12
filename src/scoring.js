@@ -98,9 +98,9 @@ export function summaryText(answers, names) {
   [0, 1].forEach((who) => {
     lines.push(names[who].toUpperCase());
     profileRows(answers[who]).forEach((r) => {
-      lines.push('  ' + r.score + '/12  ' + r.nom + '  (' + r.niveau + ')');
+      lines.push(`  ${r.score}/12  ${r.nom}  (${r.niveau})`);
     });
-    lines.push('  Total de contrôle : ' + answers[who].filter(Boolean).length + '/30');
+    lines.push(`  Total de contrôle : ${answers[who].filter(Boolean).length}/30`);
     lines.push('');
   });
   lines.push('POINTS DE VIGILANCE');
@@ -119,11 +119,11 @@ export function summaryText(answers, names) {
   });
   lines.push('');
   const div = divergenceList(answers, names);
-  lines.push('ITEMS DIVERGENTS (' + div.length + ')');
+  lines.push(`ITEMS DIVERGENTS (${div.length})`);
   div.forEach((x) => {
-    lines.push('  Item ' + x.id);
-    lines.push('    ' + x.nameA + ' — ' + x.textA);
-    lines.push('    ' + x.nameB + ' — ' + x.textB);
+    lines.push(`  Item ${x.id}`);
+    lines.push(`    ${x.nameA} — ${x.textA}`);
+    lines.push(`    ${x.nameB} — ${x.textB}`);
   });
   return lines.join('\n');
 }

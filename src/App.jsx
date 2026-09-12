@@ -39,7 +39,7 @@ export default class App extends React.Component {
     let saved = null;
     try {
       saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || 'null');
-    } catch (e) {
+    } catch (_e) {
       saved = null;
     }
     if (saved && Array.isArray(saved.answers) && saved.answers.length === 2) {
@@ -70,7 +70,7 @@ export default class App extends React.Component {
           divIdx: st.divIdx,
         }),
       );
-    } catch (e) {
+    } catch (_e) {
       /* quota ou mode privé : la passation continue sans sauvegarde */
     }
   }
@@ -95,7 +95,7 @@ export default class App extends React.Component {
   start() {
     try {
       window.localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {
+    } catch (_e) {
       /* ignore */
     }
     this.setState({
@@ -178,13 +178,13 @@ export default class App extends React.Component {
         ta.setSelectionRange(0, text.length);
         ok = document.execCommand('copy');
         document.body.removeChild(ta);
-      } catch (e) {
+      } catch (_e) {
         ok = false;
       }
       if (ok) done();
       else this.setState({ copyText: text, copied: false });
     };
-    if (navigator.clipboard && navigator.clipboard.writeText) {
+    if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(text).then(done, legacy);
     } else {
       legacy();
@@ -374,8 +374,8 @@ export default class App extends React.Component {
     );
 
     let waiting = '';
-    if (selA !== null && selB === null) waiting = 'En attente ' + de(names[1]) + names[1];
-    else if (selB !== null && selA === null) waiting = 'En attente ' + de(names[0]) + names[0];
+    if (selA !== null && selB === null) waiting = `En attente ${de(names[1])}${names[1]}`;
+    else if (selB !== null && selA === null) waiting = `En attente ${de(names[0])}${names[0]}`;
 
     return (
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>

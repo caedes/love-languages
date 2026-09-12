@@ -40,7 +40,7 @@ describe('intégrité du questionnaire', () => {
   });
 
   it("verrouille l'appariement des dimensions item par item", () => {
-    const paires = DATA.items.map((i) => i.id + ' ' + i.options[0].code + '/' + i.options[1].code);
+    const paires = DATA.items.map((i) => `${i.id} ${i.options[0].code}/${i.options[1].code}`);
     expect(paires).toMatchInlineSnapshot(`
       [
         "1 P/T",
