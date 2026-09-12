@@ -194,6 +194,8 @@ describe('parcours complet', () => {
     await user.click(screen.getByRole('button', { name: 'Vigilance' }));
     // Alice choisit toujours la première proposition (P=9, langage primaire),
     // Bob toujours la seconde (P=3, canal neutre) : c'est bien Alice le besoin fort.
+    // { selector: 'p' } : sans lui, le texte intégral du <div> englobant (son seul enfant est
+    // ce <p>) matche aussi, et getByText lève une erreur d'ambiguïté sur les deux éléments.
     expect(screen.getByText(texteIntegral(
       'Alice a un besoin fort de Paroles valorisantes, une dimension peu sensible chez Bob.'
     ), { selector: 'p' })).toBeInTheDocument();
