@@ -9,15 +9,17 @@
  */
 export function toSvg(grid, { palette }) {
   const cote = grid.length;
-  const cellules = grid.flatMap((ligne, y) => ligne.flatMap((cell, x) => (
-    cell === 0 ? [] : [`<rect x="${x}" y="${y}" width="1" height="1" fill="${palette[cell]}"/>`]
-  )));
+  const cellules = grid.flatMap((ligne, y) =>
+    ligne.flatMap((cell, x) =>
+      cell === 0 ? [] : [`<rect x="${x}" y="${y}" width="1" height="1" fill="${palette[cell]}"/>`],
+    ),
+  );
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${cote} ${cote}" shape-rendering="crispEdges">`,
     `<rect width="${cote}" height="${cote}" fill="${palette[0]}"/>`,
     ...cellules,
     '</svg>',
-    ''
+    '',
   ].join('\n');
 }

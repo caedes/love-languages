@@ -34,7 +34,9 @@ function chunk(type, data) {
   const out = new Uint8Array(data.length + 12);
   const vue = new DataView(out.buffer);
   vue.setUint32(0, data.length);
-  [...type].forEach((c, i) => { out[4 + i] = c.charCodeAt(0); });
+  [...type].forEach((c, i) => {
+    out[4 + i] = c.charCodeAt(0);
+  });
   out.set(data, 8);
   vue.setUint32(data.length + 8, crc32(out.slice(4, data.length + 8)));
   return out;
@@ -70,10 +72,13 @@ export function encodePng({ width, height, data }) {
     Uint8Array.from(SIGNATURE),
     chunk('IHDR', ihdr),
     chunk('IDAT', new Uint8Array(deflateSync(brut, { level: 9 }))),
-    chunk('IEND', new Uint8Array(0))
+    chunk('IEND', new Uint8Array(0)),
   ];
 
   const png = new Uint8Array(morceaux.reduce((n, m) => n + m.length, 0));
-  morceaux.reduce((offset, m) => { png.set(m, offset); return offset + m.length; }, 0);
+  morceaux.reduce((offset, m) => {
+    png.set(m, offset);
+    return offset + m.length;
+  }, 0);
   return png;
 }

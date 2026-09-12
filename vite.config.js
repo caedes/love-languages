@@ -14,7 +14,7 @@ export default defineConfig({
         statements: 90,
         branches: 80,
         functions: 88,
-        lines: 92
+        lines: 92,
       },
       reporter: ['text', 'html'],
       include: ['src/**'],
@@ -23,8 +23,8 @@ export default defineConfig({
         'src/styles/**',
         'src/main.jsx',
         'src/test/**',
-        'src/**/*.test.{js,jsx}'
-      ]
-    }
-  }
+        'src/**/*.test.{js,jsx}',
+      ],
+    },
+  },
 });

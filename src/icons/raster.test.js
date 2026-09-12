@@ -1,9 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { composeRgb } from './raster.js';
 
-const GRILLE = [[1, 0], [0, 2]];
+const GRILLE = [
+  [1, 0],
+  [0, 2],
+];
 const PALETTE = ['#000000', '#ff0000', '#0000ff'];
-const pixel = ({ width, data }, x, y) => [...data.slice((y * width + x) * 3, (y * width + x) * 3 + 3)];
+const pixel = ({ width, data }, x, y) => [
+  ...data.slice((y * width + x) * 3, (y * width + x) * 3 + 3),
+];
 
 describe('composeRgb', () => {
   it('produit trois octets par pixel de l’image demandée', () => {

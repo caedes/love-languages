@@ -25,7 +25,7 @@ const IMAGES = [
   // Android rogne l'icône maskable selon la forme du lanceur : seuls les 80 %
   // centraux sont garantis visibles, d'où un cœur nettement plus petit.
   { nom: 'icon-maskable-512.png', width: 512, height: 512, coverage: 0.72 },
-  { nom: 'og-image.png', width: 1200, height: 630, coverage: 0.8 }
+  { nom: 'og-image.png', width: 1200, height: 630, coverage: 0.8 },
 ];
 
 const grid = heartGrid();

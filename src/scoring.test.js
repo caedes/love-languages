@@ -1,6 +1,21 @@
 import { describe, it, expect, vi } from 'vitest';
-import { resolveNames, scores, profileRows, vigilanceList, divergenceList, summaryText, makeOrders, slotFor, codeAt, passationTerminee } from './scoring.js';
-import { REPONSES_PREMIERE_OPTION, REPONSES_SECONDE_OPTION, reponsesAvecDivergences } from './test/fixtures.js';
+import {
+  resolveNames,
+  scores,
+  profileRows,
+  vigilanceList,
+  divergenceList,
+  summaryText,
+  makeOrders,
+  slotFor,
+  codeAt,
+  passationTerminee,
+} from './scoring.js';
+import {
+  REPONSES_PREMIERE_OPTION,
+  REPONSES_SECONDE_OPTION,
+  reponsesAvecDivergences,
+} from './test/fixtures.js';
 import { DATA } from './questionnaire.js';
 
 describe('resolveNames', () => {
@@ -124,7 +139,7 @@ describe('divergenceList', () => {
       nameA: 'Alice',
       nameB: 'Bob',
       dimA: 'Paroles valorisantes',
-      dimB: 'Contact physique'
+      dimB: 'Contact physique',
     });
     expect(premier.textA).toMatch(/compliments/);
     expect(premier.textB).toMatch(/bras/);

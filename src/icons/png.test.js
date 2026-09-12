@@ -51,7 +51,9 @@ describe('encodePng', () => {
   });
 
   it('restitue les pixels, chaque ligne précédée de son octet de filtre', () => {
-    const idat = chunks(encodePng({ width: 1, height: 2, data: new Uint8Array([1, 2, 3, 4, 5, 6]) }))[1];
+    const idat = chunks(
+      encodePng({ width: 1, height: 2, data: new Uint8Array([1, 2, 3, 4, 5, 6]) }),
+    )[1];
     expect([...inflateSync(idat.data)]).toEqual([0, 1, 2, 3, 0, 4, 5, 6]);
   });
 

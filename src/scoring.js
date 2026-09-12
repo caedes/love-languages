@@ -16,7 +16,9 @@ export function resolveNames(nameA, nameB) {
  */
 export function scores(answersOfOne) {
   const out = { P: 0, M: 0, C: 0, S: 0, T: 0 };
-  (answersOfOne || []).forEach((code) => { if (code) out[code] += 1; });
+  (answersOfOne || []).forEach((code) => {
+    if (code) out[code] += 1;
+  });
   return out;
 }
 
@@ -33,7 +35,7 @@ export function profileRows(answersOfOne) {
       score: s[d.code],
       pct: Math.round((s[d.code] / DATA.meta.scoreMaxParDimension) * 100),
       color: DIM_COLOR[d.code],
-      niveau: levelFor(s[d.code]).niveau
+      niveau: levelFor(s[d.code]).niveau,
     }))
     .sort((a, b) => b.score - a.score);
 }
@@ -50,8 +52,10 @@ export function vigilanceList(answers, names) {
   DATA.meta.dimensions.forEach((d) => {
     const av = a[d.code];
     const bv = b[d.code];
-    if (av >= 9 && bv <= 4) out.push({ strong: names[0], weak: names[1], dim: d.nom, color: DIM_COLOR[d.code] });
-    else if (bv >= 9 && av <= 4) out.push({ strong: names[1], weak: names[0], dim: d.nom, color: DIM_COLOR[d.code] });
+    if (av >= 9 && bv <= 4)
+      out.push({ strong: names[0], weak: names[1], dim: d.nom, color: DIM_COLOR[d.code] });
+    else if (bv >= 9 && av <= 4)
+      out.push({ strong: names[1], weak: names[0], dim: d.nom, color: DIM_COLOR[d.code] });
   });
   return out;
 }
@@ -71,10 +75,14 @@ export function divergenceList(answers, names) {
     const tb = item.options.find((o) => o.code === cb);
     out.push({
       id: item.id,
-      nameA: names[0], nameB: names[1],
-      dimA: DIM_NAME[ca], dimB: DIM_NAME[cb],
-      textA: ta ? ta.texte : '', textB: tb ? tb.texte : '',
-      colorA: DIM_COLOR[ca], colorB: DIM_COLOR[cb]
+      nameA: names[0],
+      nameB: names[1],
+      dimA: DIM_NAME[ca],
+      dimB: DIM_NAME[cb],
+      textA: ta ? ta.texte : '',
+      textB: tb ? tb.texte : '',
+      colorA: DIM_COLOR[ca],
+      colorB: DIM_COLOR[cb],
     });
   });
   return out;
@@ -99,7 +107,15 @@ export function summaryText(answers, names) {
   const vig = vigilanceList(answers, names);
   if (!vig.length) lines.push('  Aucun écart de ce type.');
   vig.forEach((v) => {
-    lines.push('  ' + v.strong + ' a un besoin fort de ' + v.dim + ', une dimension peu sensible chez ' + v.weak + '.');
+    lines.push(
+      '  ' +
+        v.strong +
+        ' a un besoin fort de ' +
+        v.dim +
+        ', une dimension peu sensible chez ' +
+        v.weak +
+        '.',
+    );
   });
   lines.push('');
   const div = divergenceList(answers, names);
@@ -118,8 +134,10 @@ export function summaryText(answers, names) {
  * @returns {boolean}
  */
 export function passationTerminee(answers) {
-  return answers[0].filter(Boolean).length === DATA.items.length
-    && answers[1].filter(Boolean).length === DATA.items.length;
+  return (
+    answers[0].filter(Boolean).length === DATA.items.length &&
+    answers[1].filter(Boolean).length === DATA.items.length
+  );
 }
 
 /** Un ordre d'affichage tiré au sort par item, pour éviter le biais de position. */

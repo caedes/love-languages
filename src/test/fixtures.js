@@ -12,6 +12,8 @@ export const REPONSES_SECONDE_OPTION = DATA.items.map((i) => i.options[1].code);
  */
 export function reponsesAvecDivergences(indices) {
   const out = REPONSES_PREMIERE_OPTION.slice();
-  indices.forEach((i) => { out[i] = DATA.items[i].options[1].code; });
+  indices.forEach((i) => {
+    out[i] = DATA.items[i].options[1].code;
+  });
   return out;
 }

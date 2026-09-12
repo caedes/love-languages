@@ -15,9 +15,11 @@ const voisins = (grid, x, y) => {
 
 const cellules = (grid, valeur) => {
   const out = [];
-  grid.forEach((ligne, y) => ligne.forEach((cell, x) => {
-    if (cell === valeur) out.push([x, y]);
-  }));
+  grid.forEach((ligne, y) =>
+    ligne.forEach((cell, x) => {
+      if (cell === valeur) out.push([x, y]);
+    }),
+  );
   return out;
 };
 
@@ -42,7 +44,9 @@ describe('heartGrid', () => {
 
   it('ne pose de contour qu’au contact du remplissage', () => {
     const grid = heartGrid();
-    const orphelins = cellules(grid, OUTLINE).filter(([x, y]) => !voisins(grid, x, y).includes(FILL));
+    const orphelins = cellules(grid, OUTLINE).filter(
+      ([x, y]) => !voisins(grid, x, y).includes(FILL),
+    );
     expect(orphelins).toEqual([]);
   });
 
