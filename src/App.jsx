@@ -197,9 +197,9 @@ export default class App extends React.Component {
     const savedCount = this.savedCount();
     const savedDone = scoring.passationTerminee(st.answers);
     const consignes = [
-      "Chacun répond pour lui-même, sans se laisser influencer par l'autre.",
-      "Le choix est binaire et obligatoire. En cas d'hésitation, tranchez pour ce qui vous manquerait le plus.",
-      'Le dépouillement se lit ensemble, à la fin, devant le même écran.',
+      'Chacun répond pour lui-même, sans se laisser influencer par l’autre.',
+      'Le choix est binaire et obligatoire. En cas d’hésitation, tranchez pour ce qui vous manquerait le plus.',
+      'Le résultat se lit à la fin ensemble, et toujours côte à côte, devant le même écran.',
     ];
     return (
       <div
@@ -214,30 +214,20 @@ export default class App extends React.Component {
         }}
       >
         <div>
-          <p
-            style={{
-              fontSize: 11,
-              letterSpacing: '.14em',
-              textTransform: 'uppercase',
-              color: muted(50),
-              margin: '0 0 10px',
-            }}
-          >
-            Questionnaire à choix forcés
-          </p>
           <h1
             style={{
               fontSize: 'clamp(26px, 7.5vw, 34px)',
               lineHeight: 1.08,
               letterSpacing: '-.02em',
+              textWrap: 'balance',
               margin: '0 0 10px',
             }}
           >
-            Les 5 langages de l'amour
+            Les 5 langages de l’amour
           </h1>
-          <p style={{ fontSize: 14, color: muted(75), margin: 0 }}>
-            30 paires, une par écran. Vous répondez tous les deux sur le même appareil, puis les
-            profils sont comparés. Vos réponses restent sur cet appareil, rien n'est envoyé.
+          <p style={{ fontSize: 14, color: muted(75), textWrap: 'pretty', margin: 0 }}>
+            30 paires de questions, une par écran. Vous répondez en amoureux sur le même appareil,
+            puis les profils sont comparés.
           </p>
         </div>
 
@@ -259,7 +249,7 @@ export default class App extends React.Component {
               >
                 {i + 1}
               </span>
-              <p style={{ margin: 0, fontSize: 13.5, color: muted(82) }}>{t}</p>
+              <p style={{ margin: 0, fontSize: 14, color: muted(82), textWrap: 'pretty' }}>{t}</p>
             </div>
           ))}
         </div>
@@ -331,15 +321,21 @@ export default class App extends React.Component {
                 type="button"
                 className="btn btn-secondary btn-block"
                 onClick={() => this.resume()}
-                style={{ minHeight: 46, fontSize: 14, margin: '8px 0 0' }}
+                style={{
+                  minHeight: 46,
+                  fontSize: 14,
+                  fontVariantNumeric: 'tabular-nums',
+                  margin: '8px 0 0',
+                }}
               >
                 {savedDone
                   ? 'Revoir le dernier résultat'
                   : `Reprendre où nous en étions (${savedCount} / ${total})`}
               </button>
             )}
-            <p style={{ fontSize: 12, color: muted(48), margin: '10px 0 0' }}>
-              Vos réponses sont conservées sur cet appareil. « Commencer » les efface.
+            <p style={{ fontSize: 12, color: muted(65), textWrap: 'pretty', margin: '10px 0 0' }}>
+              Vos réponses sont conservées sur cet appareil uniquement, jamais envoyées sur un
+              serveur. {'«\u202fCommencer\u202f»'} les efface.
             </p>
           </div>
         )}
