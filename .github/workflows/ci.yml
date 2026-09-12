@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Avant setup-node : celui-ci a besoin de pnpm pour resoudre son cache.
+      # La version est lue dans le champ packageManager de package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Execute les tests et applique les seuils de couverture : sous le seuil,
+      # vitest sort en erreur et la gate bloque.
+      - run: pnpm test:coverage
+
+      - run: pnpm build

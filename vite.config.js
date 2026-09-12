@@ -10,6 +10,12 @@ export default defineConfig({
     setupFiles: './src/test/setup.js',
     coverage: {
       provider: 'v8',
+      thresholds: {
+        statements: 90,
+        branches: 80,
+        functions: 88,
+        lines: 92
+      },
       reporter: ['text', 'html'],
       include: ['src/**'],
       exclude: [
