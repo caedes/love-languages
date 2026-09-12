@@ -5,8 +5,8 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { heartGrid } from '../src/icons/heart.js';
-import { composeRgb } from '../src/icons/raster.js';
 import { encodePng } from '../src/icons/png.js';
+import { composeRgb } from '../src/icons/raster.js';
 import { toSvg } from '../src/icons/svg.js';
 
 // Index 0 = fond (le même bleu nuit que --color-bg et que la balise theme-color),

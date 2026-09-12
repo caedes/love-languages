@@ -1,13 +1,13 @@
 import React from 'react';
 import {
   DATA,
-  STORAGE_KEY,
   DIM_COLOR,
-  SEL_BG,
-  SEL_BORDER,
+  de,
   OFF_BG,
   OFF_BORDER,
-  de,
+  SEL_BG,
+  SEL_BORDER,
+  STORAGE_KEY,
 } from './questionnaire.js';
 import * as scoring from './scoring.js';
 

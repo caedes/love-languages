@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { DATA, levelFor, de } from './questionnaire.js';
+import { describe, expect, it } from 'vitest';
+import { DATA, de, levelFor } from './questionnaire.js';
 
 describe('intégrité du questionnaire', () => {
   it("contient le nombre d'items annoncé par meta", () => {

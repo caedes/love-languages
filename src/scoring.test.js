@@ -1,22 +1,22 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { DATA } from './questionnaire.js';
 import {
+  codeAt,
+  divergenceList,
+  makeOrders,
+  passationTerminee,
+  profileRows,
   resolveNames,
   scores,
-  profileRows,
-  vigilanceList,
-  divergenceList,
-  summaryText,
-  makeOrders,
   slotFor,
-  codeAt,
-  passationTerminee,
+  summaryText,
+  vigilanceList,
 } from './scoring.js';
 import {
   REPONSES_PREMIERE_OPTION,
   REPONSES_SECONDE_OPTION,
   reponsesAvecDivergences,
 } from './test/fixtures.js';
-import { DATA } from './questionnaire.js';
 
 describe('resolveNames', () => {
   it('retire les espaces autour des prénoms saisis', () => {

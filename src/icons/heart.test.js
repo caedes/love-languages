@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { heartGrid, BG, FILL, OUTLINE } from './heart.js';
+import { describe, expect, it } from 'vitest';
+import { BG, FILL, heartGrid, OUTLINE } from './heart.js';
 
 const voisins = (grid, x, y) => {
   const out = [];
