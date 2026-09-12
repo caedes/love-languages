@@ -142,7 +142,9 @@ dans l'index. Une erreur non corrigeable automatiquement fait sortir Biome en
 
 Sur un fichier **partiellement indexé** (`git add -p`), `git update-index
 --again` réindexe le fichier entier, donc aussi la portion délibérément laissée
-de côté. C'est le prix de l'absence de `lint-staged`, qui résout le cas en
+de côté. La nuance compte : cette commande réindexe tout chemin déjà indexé qui
+diffère de `HEAD`, que Biome l'ait corrigé ou non — un fichier partiellement
+indexé fuite donc même quand le formateur ne l'a pas touché. C'est le prix de l'absence de `lint-staged`, qui résout le cas en
 remisant le reste du fichier pendant le hook. À documenter dans le README ; si
 la pratique du `add -p` s'installe, c'est l'argument pour ajouter `lint-staged`.
 

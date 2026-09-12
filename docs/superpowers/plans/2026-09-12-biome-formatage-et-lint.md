@@ -1082,10 +1082,12 @@ tourne en CI (`pnpm check:ci`), car un hook local se contourne avec
 
 Deux choses à savoir :
 
-- **`git add -p` et le hook font mauvais ménage.** Le hook réindexe les fichiers
-  entiers qu'il a corrigés : la portion que vous aviez délibérément laissée de
-  côté part avec le commit. Pour un commit partiel, passez par
-  `git commit --no-verify` et lancez `pnpm format` ensuite.
+- **`git add -p` et le hook font mauvais ménage.** `git update-index --again`
+  réindexe **tout chemin déjà indexé qui diffère de `HEAD`**, entier — que Biome
+  l'ait corrigé ou non. La portion que vous aviez délibérément laissée de côté
+  part donc avec le commit, y compris dans un fichier auquel Biome n'a pas
+  touché. Pour un commit partiel, passez par `git commit --no-verify` et lancez
+  `pnpm format` ensuite.
 - **Le blâme des lignes.** Deux commits ont reformaté tout le dépôt d'un coup.
   Ils sont listés dans `.git-blame-ignore-revs`, que GitHub lit tout seul. En
   local, une fois pour toutes :
