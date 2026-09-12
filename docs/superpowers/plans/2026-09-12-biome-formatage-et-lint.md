@@ -840,11 +840,19 @@ scripts.
 Remplacer le contenu de `.husky/pre-commit` par :
 
 ```sh
-./node_modules/.bin/biome check --write --staged --files-ignore-unknown=true --no-errors-on-unmatched
+pnpm exec biome check --write --staged --files-ignore-unknown=true --no-errors-on-unmatched
 git update-index --again
 ```
 
 Pas de shebang ni de ligne d'amorçage : husky 9 n'en a plus besoin.
+
+**Le hook garde `pnpm exec`, contrairement aux commandes de mesure de ce plan.**
+Ces dernières invoquent le binaire par son chemin pour échapper à un outil qui
+réécrit les commandes `pnpm` sur le poste de développement — une précaution de
+mesure, locale à ce plan. Le hook, lui, est du code livré : il tournera sur la
+machine de quiconque clone le dépôt, et `pnpm exec` y résout le binaire quelle
+que soit la disposition des `node_modules`. Un chemin relatif en dur n'y
+survivrait pas à un dépôt transformé en espace de travail pnpm.
 
 - [ ] **Step 3 : Vérifier que `prepare` est bien là**
 
@@ -1215,7 +1223,7 @@ bien avant que les tests ne s'en aperçoivent. Toujours passer
 donne de faux décomptes.
 
 Ces appels de mesure invoquent le binaire par son chemin,
-`./node_modules/.bin/biome`, et non `pnpm check` ni `./node_modules/.bin/biome`. Deux
+`./node_modules/.bin/biome`, et non `pnpm check` ni `pnpm exec biome`. Deux
 raisons : `pnpm check --drapeau` ne garantit pas la transmission du drapeau au
 script sous-jacent, et surtout, sur un poste où un outil réécrit les commandes
 `pnpm` à la volée, une sortie filtrée peut afficher « No issues found » sur un
