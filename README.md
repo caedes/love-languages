@@ -34,6 +34,31 @@ v8 sans laisser passer une régression franche.
 CI verte obligatoire, force-push refusé. Aucune approbation n'est exigée, GitHub
 interdisant d'approuver sa propre pull request.
 
+## Déploiement
+
+Le site est publié sur Netlify : <https://cinq-langages-amour.netlify.app>.
+Chaque push sur `main` — donc chaque merge de pull request — déclenche le job
+`deploy` de `.github/workflows/ci.yml`, qui pousse le `dist/` via la CLI Netlify.
+Le bundle publié est exactement celui qui vient de passer les tests : il transite
+d'un job à l'autre en artefact, il n'est pas reconstruit.
+
+Sur une pull request, le job est *skipped* — sa garde exige un `push` sur `main`.
+Il ne fait pas partie des checks requis du ruleset : un déploiement raté ne bloque
+donc pas les merges suivants, il se rejoue.
+
+Deux valeurs vivent côté GitHub :
+
+| nom | type | contenu |
+| --- | --- | --- |
+| `NETLIFY_AUTH_TOKEN` | secret | personal access token Netlify (*User settings → Applications*) |
+| `NETLIFY_SITE_ID` | variable | identifiant du site |
+
+L'ID est une variable et non un secret : ce n'est pas une clé, et le garder lisible
+dans les logs fait gagner du temps le jour où un déploiement vise le mauvais site.
+
+Pour rejouer un déploiement raté, relancer le job depuis l'onglet Actions
+(« Re-run failed jobs ») : l'artefact `dist` est conservé sept jours.
+
 ## Arborescence
 
 ```

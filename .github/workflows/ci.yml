@@ -30,3 +30,35 @@ jobs:
       - run: pnpm test:coverage
 
       - run: pnpm build
+
+      # Ce qui part en prod est le bundle qui vient de passer les tests, et non
+      # un rebuild : le job deploy recupere cet artefact tel quel.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  deploy:
+    name: deploy
+    needs: ci
+    # Jamais sur une pull request : la garde est fausse, le job apparait skipped
+    # et ne bloque rien. La gate de merge reste le job ci seul.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # --no-build : Netlify ne construit rien ici, il recoit un dist/ deja bati.
+      - run: npx --yes netlify-cli@27 deploy --prod --dir=dist --no-build
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
