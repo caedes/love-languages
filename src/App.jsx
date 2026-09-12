@@ -242,8 +242,8 @@ export default class App extends React.Component {
         </div>
 
         <div style={{ display: 'grid', gap: 12 }}>
-          {consignes.map((t, i) => (
-            <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+          {consignes.map((t) => (
+            <div key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <span
                 style={{
                   flex: 'none',
@@ -257,7 +257,7 @@ export default class App extends React.Component {
                   fontSize: 11,
                 }}
               >
-                {i + 1}
+                {consignes.findIndex((x) => x === t) + 1}
               </span>
               <p style={{ margin: 0, fontSize: 13.5, color: muted(82) }}>{t}</p>
             </div>
@@ -451,7 +451,7 @@ export default class App extends React.Component {
             const labelId = `lq-opt-${st.idx}-${slot}`;
             return (
               <div
-                key={slot}
+                key={opt.code}
                 role="group"
                 aria-labelledby={labelId}
                 style={{
@@ -670,9 +670,9 @@ export default class App extends React.Component {
                 </p>
               ) : (
                 <div style={{ display: 'grid', gap: 12 }}>
-                  {vig.map((v, i) => (
+                  {vig.map((v) => (
                     <p
-                      key={i}
+                      key={v.dim}
                       style={{
                         margin: 0,
                         paddingLeft: 12,
