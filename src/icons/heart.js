@@ -58,14 +58,14 @@ function voisines(x, y) {
 export function heartGrid() {
   const grid = DESSIN.map((ligne) => [...ligne].map((c) => (c === '#' ? FILL : BG)));
 
-  grid.forEach((ligne, y) =>
+  grid.forEach((ligne, y) => {
     ligne.forEach((cell, x) => {
       if (cell !== FILL) return;
       voisines(x, y).forEach(([vx, vy]) => {
         if (grid[vy][vx] === BG) grid[vy][vx] = OUTLINE;
       });
-    }),
-  );
+    });
+  });
 
   return grid;
 }

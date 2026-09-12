@@ -210,7 +210,9 @@ describe('makeOrders', () => {
   });
 
   it('ne rend que des 0 et des 1', () => {
-    makeOrders().forEach((v) => expect([0, 1]).toContain(v));
+    makeOrders().forEach((v) => {
+      expect([0, 1]).toContain(v);
+    });
   });
 
   it('inverse l’affichage sous le seuil de 0,5', () => {

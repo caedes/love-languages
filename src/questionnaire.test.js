@@ -29,11 +29,11 @@ describe('intégrité du questionnaire', () => {
     DATA.meta.dimensions.forEach((d) => {
       compte[d.code] = 0;
     });
-    DATA.items.forEach((item) =>
+    DATA.items.forEach((item) => {
       item.options.forEach((opt) => {
         compte[opt.code] += 1;
-      }),
-    );
+      });
+    });
     DATA.meta.dimensions.forEach((d) => {
       expect(compte[d.code]).toBe(DATA.meta.scoreMaxParDimension);
     });

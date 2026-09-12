@@ -15,11 +15,11 @@ const voisins = (grid, x, y) => {
 
 const cellules = (grid, valeur) => {
   const out = [];
-  grid.forEach((ligne, y) =>
+  grid.forEach((ligne, y) => {
     ligne.forEach((cell, x) => {
       if (cell === valeur) out.push([x, y]);
-    }),
-  );
+    });
+  });
   return out;
 };
 
@@ -27,7 +27,9 @@ describe('heartGrid', () => {
   it('rend une grille carrée de 16 cellules de côté', () => {
     const grid = heartGrid();
     expect(grid).toHaveLength(16);
-    grid.forEach((ligne) => expect(ligne).toHaveLength(16));
+    grid.forEach((ligne) => {
+      expect(ligne).toHaveLength(16);
+    });
   });
 
   it('dessine une forme symétrique par rapport à l’axe vertical', () => {
