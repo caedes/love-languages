@@ -19,6 +19,21 @@ pnpm test:coverage  # rapport de couverture dans coverage/
 Les tests interrogent l'interface comme le ferait un lecteur d'écran
 (rôles ARIA et libellés accessibles), sans `data-testid`.
 
+## Intégration continue
+
+`.github/workflows/ci.yml` rejoue `pnpm test:coverage` puis `pnpm build` sur
+chaque pull request vers `main` et sur chaque push vers `main`.
+
+Les seuils de couverture vivent dans `vite.config.js` (`test.coverage.thresholds`) :
+sous le seuil, `vitest` sort en erreur et la CI échoue. C'est donc la même
+commande qui produit le rapport et qui bloque le merge. Les valeurs sont posées
+quelques points sous la couverture réelle, pour absorber le bruit de mesure de
+v8 sans laisser passer une régression franche.
+
+`main` est protégée par un ruleset : passage par une pull request obligatoire,
+CI verte obligatoire, force-push refusé. Aucune approbation n'est exigée, GitHub
+interdisant d'approuver sa propre pull request.
+
 ## Arborescence
 
 ```
