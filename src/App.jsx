@@ -242,7 +242,7 @@ export default class App extends React.Component {
         </div>
 
         <div style={{ display: 'grid', gap: 12 }}>
-          {consignes.map((t) => (
+          {consignes.map((t, i) => (
             <div key={t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <span
                 style={{
@@ -257,7 +257,7 @@ export default class App extends React.Component {
                   fontSize: 11,
                 }}
               >
-                {consignes.findIndex((x) => x === t) + 1}
+                {i + 1}
               </span>
               <p style={{ margin: 0, fontSize: 13.5, color: muted(82) }}>{t}</p>
             </div>
