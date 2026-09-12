@@ -254,6 +254,17 @@ describe('persistance locale', () => {
     expect(screen.getByRole('button', { name: 'Revoir le dernier résultat' })).toBeInTheDocument();
   });
 
+  it('ramène sur les profils au clic sur « Revoir le dernier résultat »', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 0);
+    await user.click(screen.getByRole('button', { name: 'Recommencer' }));
+    await user.click(screen.getByRole('button', { name: 'Revoir le dernier résultat' }));
+
+    expect(screen.getByRole('heading', { name: 'Vos deux profils' })).toBeInTheDocument();
+  });
+
   it('efface la sauvegarde quand on relance une passation', async () => {
     const user = preparer();
     render(<App />);

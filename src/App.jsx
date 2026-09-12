@@ -65,9 +65,7 @@ export default class App extends React.Component {
   }
 
   resume() {
-    const st = this.state;
-    const done = st.answers[0].filter(Boolean).length === DATA.items.length
-      && st.answers[1].filter(Boolean).length === DATA.items.length;
+    const done = scoring.passationTerminee(this.state.answers);
     this.setState({ screen: done ? 'results' : 'quiz' });
   }
 
@@ -142,7 +140,7 @@ export default class App extends React.Component {
     const doneA = st.answers[0].filter(Boolean).length;
     const doneB = st.answers[1].filter(Boolean).length;
     const savedCount = Math.min(doneA, doneB);
-    const savedDone = doneA === total && doneB === total;
+    const savedDone = scoring.passationTerminee(st.answers);
     const consignes = [
       "Chacun répond pour lui-même, sans se laisser influencer par l'autre.",
       "Le choix est binaire et obligatoire. En cas d'hésitation, tranchez pour ce qui vous manquerait le plus.",

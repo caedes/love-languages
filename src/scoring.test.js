@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { resolveNames, scores, profileRows, vigilanceList, divergenceList, summaryText, makeOrders, slotFor, codeAt } from './scoring.js';
+import { resolveNames, scores, profileRows, vigilanceList, divergenceList, summaryText, makeOrders, slotFor, codeAt, passationTerminee } from './scoring.js';
 import { REPONSES_PREMIERE_OPTION, REPONSES_SECONDE_OPTION, reponsesAvecDivergences } from './test/fixtures.js';
 import { DATA } from './questionnaire.js';
 
@@ -206,6 +206,22 @@ describe('makeOrders', () => {
   it('conserve l’ordre du JSON au-dessus du seuil', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.9);
     expect(makeOrders().every((v) => v === 0)).toBe(true);
+  });
+});
+
+describe('passationTerminee', () => {
+  it('rend vrai quand les deux participants ont répondu à tous les items', () => {
+    expect(passationTerminee([REPONSES_PREMIERE_OPTION, REPONSES_SECONDE_OPTION])).toBe(true);
+  });
+
+  it('rend faux quand il manque une seule réponse à l’un des deux', () => {
+    const incomplete = REPONSES_PREMIERE_OPTION.slice();
+    incomplete[incomplete.length - 1] = null;
+    expect(passationTerminee([incomplete, REPONSES_SECONDE_OPTION])).toBe(false);
+  });
+
+  it('rend faux sur une passation vierge', () => {
+    expect(passationTerminee([[], []])).toBe(false);
   });
 });
 

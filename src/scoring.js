@@ -112,6 +112,16 @@ export function summaryText(answers, names) {
   return lines.join('\n');
 }
 
+/**
+ * Vrai quand les deux participants ont répondu à tous les items du questionnaire.
+ * @param {[Array<string|null|undefined>, Array<string|null|undefined>]} answers
+ * @returns {boolean}
+ */
+export function passationTerminee(answers) {
+  return answers[0].filter(Boolean).length === DATA.items.length
+    && answers[1].filter(Boolean).length === DATA.items.length;
+}
+
 /** Un ordre d'affichage tiré au sort par item, pour éviter le biais de position. */
 export function makeOrders() {
   return DATA.items.map(() => (Math.random() < 0.5 ? 1 : 0));
