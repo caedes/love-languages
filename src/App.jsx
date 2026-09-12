@@ -1,4 +1,5 @@
 import React from 'react';
+import { HeartLogo } from './icons/HeartLogo.jsx';
 import {
   DATA,
   DIM_COLOR,
@@ -213,6 +214,24 @@ export default class App extends React.Component {
           animation: 'lqFade .3s ease',
         }}
       >
+        {/* La coque ne défile pas : sur un écran court, le cœur cède avant que les
+            boutons ne sortent de l'écran. L'espace manquant se répartit au prorata
+            du coefficient de rétrécissement et de la taille de chaque bloc ; face à
+            des pavés de texte qui, eux, ne se compriment pas, il faut un coefficient
+            très supérieur à 1 pour que le logo absorbe presque tout à lui seul. */}
+        <div
+          style={{
+            display: 'flex',
+            alignSelf: 'center',
+            flexGrow: 0,
+            flexShrink: 200,
+            flexBasis: 'auto',
+            minHeight: 0,
+          }}
+        >
+          <HeartLogo />
+        </div>
+
         <div>
           <h1
             style={{

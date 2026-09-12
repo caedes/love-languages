@@ -5,13 +5,10 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { heartGrid } from '../src/icons/heart.js';
+import { PALETTE } from '../src/icons/palette.js';
 import { encodePng } from '../src/icons/png.js';
 import { composeRgb } from '../src/icons/raster.js';
 import { toSvg } from '../src/icons/svg.js';
-
-// Index 0 = fond (le même bleu nuit que --color-bg et que la balise theme-color),
-// 1 = carmin, 2 = le liseré plus rose qui détache le cœur du fond.
-const PALETTE = ['#161826', '#c51f3e', '#e8607f'];
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
 

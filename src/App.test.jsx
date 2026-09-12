@@ -73,6 +73,39 @@ describe('écran d’accueil', () => {
   });
 
   /**
+   * Le cœur est décoratif : il est `aria-hidden`, donc hors de portée des
+   * requêtes par rôle. `App.jsx` ne produit aucun autre `svg`, la recherche par
+   * balise désigne donc bien le logo.
+   */
+  it('coiffe l’accueil du cœur du site', () => {
+    const { container } = render(<App />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  /**
+   * La coque ne défile pas (`overflow: hidden`) : sur un écran court, c'est au
+   * cœur de céder, jamais aux boutons de sortir de l'écran. Mesuré dans un
+   * navigateur, un logo en `flex: none` coupait le paragraphe final dès 667 px
+   * de haut quand une reprise est proposée. jsdom ne met rien en page : le test
+   * garde la déclaration, seul témoin durable de cette contrainte.
+   */
+  it('laisse le cœur rétrécir plutôt que de pousser les boutons hors de l’écran', () => {
+    const { container } = render(<App />);
+
+    expect(container.querySelector('svg').parentElement).toHaveStyle({
+      flexShrink: '200',
+      minHeight: '0px',
+    });
+  });
+
+  it('laisse le logo à l’accueil et n’encombre pas la passation', async () => {
+    const user = preparer();
+    const { container } = render(<App />);
+    await demarrer(user);
+    expect(container.querySelector('svg')).not.toBeInTheDocument();
+  });
+
+  /**
    * La promesse de confidentialité est la raison d’être de l’app : tout tient en
    * localStorage, rien ne sort. Elle se perd facilement dans une reformulation.
    */
