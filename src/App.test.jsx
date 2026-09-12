@@ -30,6 +30,13 @@ async function repondre(user, slotAlice, slotBob) {
   await act(async () => { vi.advanceTimersByTime(400); });
 }
 
+/** Répond aux 30 items : Alice sur la position `slotAlice`, Bob sur `slotBob`. */
+async function repondreTout(user, slotAlice, slotBob) {
+  for (let i = 0; i < DATA.items.length; i += 1) {
+    await repondre(user, slotAlice, slotBob);
+  }
+}
+
 beforeEach(() => { window.localStorage.clear(); });
 afterEach(() => { vi.useRealTimers(); });
 
@@ -115,6 +122,75 @@ describe('écran de passation', () => {
     await demarrer(user);
     await repondre(user, 0, 0);
     await user.click(screen.getByRole('button', { name: /Question précédente/ }));
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 1 sur 30');
+    screen.getAllByRole('group').forEach((carte) => {
+      within(carte).getAllByRole('button').forEach((b) => {
+        expect(b).toHaveAttribute('aria-pressed', 'false');
+      });
+    });
+  });
+});
+
+describe('parcours complet', () => {
+  it('affiche deux profils identiques quand les deux répondent pareil', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 0);
+
+    expect(screen.getByRole('heading', { name: 'Vos deux profils' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Alice' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Bob' })).toBeInTheDocument();
+    // Toujours la première proposition : P=9, M=7, C=5, S=4, T=5, pour chacun.
+    expect(screen.getAllByText('9/12')).toHaveLength(2);
+    expect(screen.getAllByText('4/12')).toHaveLength(2);
+  });
+
+  it('relève la vigilance et les divergences quand les choix s’opposent', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 1);
+
+    await user.click(screen.getByRole('button', { name: 'Vigilance' }));
+    expect(screen.getByText(/Paroles valorisantes/)).toBeInTheDocument();
+
+    expect(screen.getByRole('button', { name: 'Divergences (30)' })).toBeInTheDocument();
+  });
+});
+
+describe('persistance locale', () => {
+  it('reprend à la question en cours après un remontage', async () => {
+    const user = preparer();
+    const vue = render(<App />);
+    await demarrer(user);
+    await repondre(user, 0, 0);
+    await repondre(user, 0, 0);
+    vue.unmount();
+
+    render(<App />);
+    // La sauvegarde restaure aussi l'écran : on revient directement sur la passation.
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 3 sur 30');
+  });
+
+  it('propose de revoir le dernier résultat depuis l’accueil', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 0);
+    await user.click(screen.getByRole('button', { name: 'Recommencer' }));
+
+    expect(screen.getByRole('button', { name: 'Revoir le dernier résultat' })).toBeInTheDocument();
+  });
+
+  it('efface la sauvegarde quand on relance une passation', async () => {
+    const user = preparer();
+    render(<App />);
+    await demarrer(user);
+    await repondreTout(user, 0, 0);
+    await user.click(screen.getByRole('button', { name: 'Recommencer' }));
+    await user.click(screen.getByRole('button', { name: 'Commencer' }));
 
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', 'question 1 sur 30');
     screen.getAllByRole('group').forEach((carte) => {
