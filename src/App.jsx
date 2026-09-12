@@ -450,11 +450,12 @@ export default class App extends React.Component {
           {shown.map((opt, slot) => {
             const labelId = `lq-opt-${st.idx}-${slot}`;
             return (
-              <div
+              <fieldset
                 key={opt.code}
-                role="group"
                 aria-labelledby={labelId}
                 style={{
+                  margin: 0,
+                  minInlineSize: 0,
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 16,
@@ -480,7 +481,7 @@ export default class App extends React.Component {
                   {chip(selA, slot, 0)}
                   {chip(selB, slot, 1)}
                 </div>
-              </div>
+              </fieldset>
             );
           })}
         </div>
@@ -566,21 +567,32 @@ export default class App extends React.Component {
           </p>
         </div>
 
-        <div role="group" aria-label="Vue des résultats" style={{ display: 'flex', gap: 6 }}>
+        <fieldset
+          aria-label="Vue des résultats"
+          style={{
+            display: 'flex',
+            gap: 6,
+            margin: 0,
+            padding: 0,
+            border: 'none',
+            minInlineSize: 0,
+          }}
+        >
           {tab('profils', 'Profils')}
           {tab('vigilance', 'Vigilance')}
           {tab('divergences', `Divergences (${div.length})`)}
-        </div>
+        </fieldset>
 
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {st.tab === 'profils' && (
             <div style={{ display: 'grid', gap: 12 }}>
               {[0, 1].map((who) => (
-                <div
+                <fieldset
                   key={who}
-                  role="group"
                   aria-labelledby={`lq-profil-${who}`}
                   style={{
+                    margin: 0,
+                    minInlineSize: 0,
                     background: 'var(--color-surface)',
                     border: '1px solid var(--color-divider)',
                     borderRadius: 'var(--radius-lg)',
@@ -645,7 +657,7 @@ export default class App extends React.Component {
                   >
                     Contrôle : {st.answers[who].filter(Boolean).length}/30
                   </p>
-                </div>
+                </fieldset>
               ))}
             </div>
           )}
