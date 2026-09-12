@@ -110,7 +110,7 @@ l'intégration continue.
 
 ### Périmètre des fichiers
 
-JS, JSX, JSON et CSS — dix-neuf fichiers touchés par la première passe. Cela
+JS, JSX, JSON et CSS — vingt fichiers touchés par la première passe. Cela
 inclut `src/data/langages-amour-questions.json`, dont la disposition compacte
 actuelle (un item par ligne, 142 lignes) sera éclatée en 420 lignes.
 
@@ -168,7 +168,7 @@ sans accents dans ce dépôt : la convention est conservée.
 
 ## Section 4 — La migration
 
-Une pull request sur la branche `biome-js`, onze commits.
+Une pull request sur la branche `biome-js`, 27 commits.
 
 | # | commit | contenu |
 | --- | --- | --- |
