@@ -25,11 +25,17 @@ ci-dessous. Ces chiffres fondent le découpage de la migration :
 
 | passe | diagnostics restants |
 | --- | --- |
-| état actuel | 65 (48 erreurs, 7 avertissements, 10 infos) |
+| état actuel | 69 (51 erreurs, 7 avertissements, 11 infos) |
 | après `check --write` (correctifs sûrs) | 39 |
 | après `check --write --unsafe` | 22, toutes à trancher à la main |
 
-Le formatage seul pèse ~1 900 lignes de diff sur 17 fichiers.
+Ces mesures ne valent qu'en présence de `package.json` dans l'arborescence
+analysée : c'est de lui que Biome déduit les *domains* React et Vitest, donc
+l'activation de règles comme `noArrayIndexKey`. Une mesure faite sur une copie
+partielle les sous-estime.
+
+Le formatage seul pèse ~1 900 lignes de diff sur 19 fichiers, dont 526 pour
+`src/data/langages-amour-questions.json` et 480 pour `src/styles/nocturne.css`.
 
 Les 22 irréductibles, après examen des sites concernés :
 
@@ -37,8 +43,8 @@ Les 22 irréductibles, après examen des sites concernés :
 | --- | --- | --- |
 | `a11y/useButtonType` | 11 | Hygiène. Il n'y a aucun `<form>` dans `App.jsx` : pas de soumission accidentelle en embuscade. Mécanique. |
 | `suspicious/useIterableCallbackReturn` | 5 | Toutes le même motif — un `forEach` imbriqué en corps d'expression d'une flèche. Correctif : des accolades. Aucun changement de comportement, y compris dans `src/icons/heart.js`. |
-| `suspicious/noArrayIndexKey` | 3 | `key={i}` sur des listes calculées (`App.jsx` lignes 181, 266, 363). Demande une clé stable tirée du contenu. |
-| `a11y/useSemanticElements` | 3 | `role="group"` et `role="status"` posés sur des `div` et des `p`. Demande du jugement, et touche le terrain couvert par les tests. |
+| `suspicious/noArrayIndexKey` | 3 | Clés d'index sur des listes calculées (`App.jsx` lignes 181, 266 et 363 avant formatage ; 246, 450 et 669 après). Demande une clé stable tirée du contenu. |
+| `a11y/useSemanticElements` | 3 | Trois `div role="group"`, pour lesquels Biome réclame un `<fieldset>`. Demande du jugement — `fieldset` porte des styles par défaut et se comporte à part en flex — et touche le terrain couvert par les tests. |
 
 Six corrections sur vingt-deux demandent donc vraiment de réfléchir.
 
@@ -56,6 +62,8 @@ Six corrections sur vingt-deux demandent donc vraiment de réfléchir.
 | Correctifs *unsafe* | Appliqués puis relus un par un | La suppression de variables et d'imports inutilisés peut révéler un calcul mort qui mérite un regard |
 | Découpage | Une seule pull request | Les 22 corrections sont concentrées et peu risquées ; le dépôt est conforme dès le merge, sans règle désactivée à rallumer plus tard |
 | Markdown et YAML | Hors du champ | Biome 2 ne les formate pas. `README.md`, `AGENTS.md` et `ci.yml` restent hors de son autorité — à savoir plutôt qu'à découvrir |
+| Guillemets du CSS | Simples, comme en JS | Le défaut de Biome est le guillemet double ; l'aligner évite une incohérence entre deux familles de fichiers du même dépôt, et supprime dix lignes de diff |
+| Le JSON des questions | Formaté comme le reste, sans exception | `src/data/langages-amour-questions.json` passe de 142 à 420 lignes. Le coût est assumé : aucune zone du dépôt n'échappe à Biome, et la règle reste expliquable en une phrase. Si les diffs sur les 30 items deviennent pénibles à relire, un `override` portant `lineWidth` à 180 sur `src/data/**` restaure la disposition compacte sans rien exclure |
 
 ## Section 1 — Outillage et configuration
 
@@ -76,6 +84,7 @@ Deux devDependencies, et rien d'autre :
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "javascript": { "formatter": { "quoteStyle": "single" } },
+  "css": { "formatter": { "quoteStyle": "single" } },
   "linter": { "enabled": true, "rules": { "recommended": true } }
 }
 ```
@@ -100,8 +109,9 @@ l'intégration continue.
 
 ### Périmètre des fichiers
 
-JS, JSX, JSON et CSS. Cela inclut `src/data/langages-amour-questions.json`, qui
-sera donc reformaté.
+JS, JSX, JSON et CSS — dix-neuf fichiers touchés par la première passe. Cela
+inclut `src/data/langages-amour-questions.json`, dont la disposition compacte
+actuelle (un item par ligne, 142 lignes) sera éclatée en 420 lignes.
 
 ## Section 2 — Le hook de pre-commit
 
@@ -161,7 +171,7 @@ Une pull request sur la branche `biome-js`, onze commits.
 | # | commit | contenu |
 | --- | --- | --- |
 | 1 | `chore: 🤖 ajoute Biome et sa configuration` | `biome.json`, la devDependency, les trois scripts. Aucun fichier source touché. |
-| 2 | `chore: 🤖 applique le formatage Biome au dépôt` | `biome format --write` seul. ~1 900 lignes, 17 fichiers, purement mécanique. |
+| 2 | `chore: 🤖 applique le formatage Biome au dépôt` | `biome format --write` seul. ~1 900 lignes, 19 fichiers, purement mécanique. |
 | 3 | `chore: 🤖 applique les correctifs sûrs et trie les imports` | `biome check --write`. Petit diff. |
 | 4 | `refactor: 💡 supprime le code mort et simplifie les concaténations` | Les 26 correctifs *unsafe* — `noUnusedVariables` ×4, `noUnusedImports` ×2, `useTemplate` ×9, `useOptionalChain` ×1 et leurs suites — appliqués puis relus un par un. |
 | 5 | `refactor: 💡 ferme les callbacks forEach imbriqués` | Les 5 jeux d'accolades. |
