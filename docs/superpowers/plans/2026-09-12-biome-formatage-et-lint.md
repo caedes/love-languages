@@ -1037,9 +1037,14 @@ Avec les deux SHA relevés, en clair et commentés :
 # Commits de reformatage massif : ils ne portent aucun changement de
 # comportement et noieraient git blame. GitHub lit ce fichier automatiquement.
 # En local : git config blame.ignoreRevsFile .git-blame-ignore-revs
-<SHA de la tâche 2>  chore: applique le formatage Biome au dépôt
-<SHA de la tâche 3>  chore: applique les correctifs sûrs et trie les imports
+<SHA complet de la tâche 2>
+<SHA complet de la tâche 3>
 ```
+
+**Des SHA nus, et complets.** Une ligne portant autre chose qu'un identifiant —
+le message du commit, par exemple — fait échouer `git blame` avec
+`fatal: invalid object name`. Seuls les commentaires préfixés de `#` sont admis.
+Et GitHub ne lit pas les formes abrégées : il faut les 40 caractères.
 
 Les retrouver au besoin :
 
@@ -1128,6 +1133,8 @@ Après la section « Messages de commit » :
 Biome tient la mise en forme et le lint de tout ce qui est JS, JSX, JSON et CSS.
 Ne discutez pas le style avec l'outil : `pnpm format` tranche. Un hook de
 pre-commit l'applique aux fichiers indexés, et `pnpm check:ci` garde la CI.
+C'est la sévérité du diagnostic qui décide du blocage : un `error` refuse le
+commit, un `warning` passe.
 
 Deux règles de travail :
 
