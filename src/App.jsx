@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  DATA, STORAGE_KEY, DIM_COLOR, DIM_NAME,
+  DATA, STORAGE_KEY, DIM_COLOR,
   SEL_BG, SEL_BORDER, OFF_BG, OFF_BORDER,
   de
 } from './questionnaire.js';
@@ -115,74 +115,10 @@ export default class App extends React.Component {
     this.setState({ answers, idx: this.state.idx - 1 });
   }
 
-  /** Les dimensions où l'un est en langage primaire (9-12) et l'autre en canal neutre (0-4). */
-  vigilanceList() {
-    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
-    const a = scoring.scores(this.state.answers[0]);
-    const b = scoring.scores(this.state.answers[1]);
-    const out = [];
-    DATA.meta.dimensions.forEach((d) => {
-      const av = a[d.code];
-      const bv = b[d.code];
-      if (av >= 9 && bv <= 4) out.push({ strong: names[0], weak: names[1], dim: d.nom, color: DIM_COLOR[d.code] });
-      else if (bv >= 9 && av <= 4) out.push({ strong: names[1], weak: names[0], dim: d.nom, color: DIM_COLOR[d.code] });
-    });
-    return out;
-  }
-
-  /** Les items où les deux n'ont pas retenu la même dimension. */
-  divergenceList() {
-    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
-    const st = this.state;
-    const out = [];
-    DATA.items.forEach((item, i) => {
-      const ca = st.answers[0][i];
-      const cb = st.answers[1][i];
-      if (!ca || !cb || ca === cb) return;
-      const ta = item.options.find((o) => o.code === ca);
-      const tb = item.options.find((o) => o.code === cb);
-      out.push({
-        id: item.id,
-        nameA: names[0], nameB: names[1],
-        dimA: DIM_NAME[ca], dimB: DIM_NAME[cb],
-        textA: ta ? ta.texte : '', textB: tb ? tb.texte : '',
-        colorA: DIM_COLOR[ca], colorB: DIM_COLOR[cb]
-      });
-    });
-    return out;
-  }
-
-  summaryText() {
-    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
-    const lines = [DATA.meta.titre, ''];
-    [0, 1].forEach((who) => {
-      lines.push(names[who].toUpperCase());
-      scoring.profileRows(this.state.answers[who]).forEach((r) => {
-        lines.push('  ' + r.score + '/12  ' + r.nom + '  (' + r.niveau + ')');
-      });
-      lines.push('  Total de contrôle : ' + this.state.answers[who].filter(Boolean).length + '/30');
-      lines.push('');
-    });
-    lines.push('POINTS DE VIGILANCE');
-    const vig = this.vigilanceList();
-    if (!vig.length) lines.push('  Aucun écart de ce type.');
-    vig.forEach((v) => {
-      lines.push('  ' + v.strong + ' a un besoin fort de ' + v.dim + ', une dimension peu sensible chez ' + v.weak + '.');
-    });
-    lines.push('');
-    const div = this.divergenceList();
-    lines.push('ITEMS DIVERGENTS (' + div.length + ')');
-    div.forEach((x) => {
-      lines.push('  Item ' + x.id);
-      lines.push('    ' + x.nameA + ' — ' + x.textA);
-      lines.push('    ' + x.nameB + ' — ' + x.textB);
-    });
-    return lines.join('\n');
-  }
-
   /** Copie la synthèse ; en cas de refus du navigateur, expose le texte à copier à la main. */
   copy() {
-    const text = this.summaryText();
+    const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
+    const text = scoring.summaryText(this.state.answers, names);
     const done = () => {
       this.setState({ copied: true, copyText: null });
       clearTimeout(this._copyTimer);
@@ -328,8 +264,8 @@ export default class App extends React.Component {
   renderResults() {
     const st = this.state;
     const names = scoring.resolveNames(this.state.nameA, this.state.nameB);
-    const vig = this.vigilanceList();
-    const div = this.divergenceList();
+    const vig = scoring.vigilanceList(st.answers, names);
+    const div = scoring.divergenceList(st.answers, names);
     const dc = div[Math.min(st.divIdx, Math.max(div.length - 1, 0))] || null;
 
     const tab = (name, label) => (
