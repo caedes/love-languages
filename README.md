@@ -8,6 +8,17 @@ pnpm dev      # http://localhost:5173
 pnpm build    # bundle statique dans dist/
 ```
 
+## Tests
+
+```bash
+pnpm test           # mode watch
+pnpm test:run       # une passe
+pnpm test:coverage  # rapport de couverture dans coverage/
+```
+
+Les tests interrogent l'interface comme le ferait un lecteur d'écran
+(rôles ARIA et libellés accessibles), sans `data-testid`.
+
 ## Arborescence
 
 ```
