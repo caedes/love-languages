@@ -11,7 +11,9 @@ const muted = (pct) => `color-mix(in srgb, var(--color-text) ${pct}%, transparen
 /**
  * Le questionnaire des 5 langages de l'amour pour deux personnes sur un même appareil :
  * accueil, passation à deux mains item par item, puis comparaison des deux profils.
- * L'état de la passation est conservé en `localStorage` et effacé au clic sur « Commencer ».
+ * L'état de la passation est conservé en `localStorage`, l'écran courant non : un rechargement
+ * repart toujours de l'accueil, qui propose alors de reprendre. « Commencer » efface la
+ * sauvegarde, après confirmation lorsqu'une passation est en cours.
  */
 export default class App extends React.Component {
   state = {
@@ -24,7 +26,8 @@ export default class App extends React.Component {
     tab: 'profils',
     divIdx: 0,
     copied: false,
-    copyText: null
+    copyText: null,
+    confirmReset: false
   };
 
   componentDidMount() {
@@ -32,7 +35,6 @@ export default class App extends React.Component {
     try { saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { saved = null; }
     if (saved && Array.isArray(saved.answers) && saved.answers.length === 2) {
       this.setState({
-        screen: saved.screen || 'home',
         nameA: saved.nameA || '',
         nameB: saved.nameB || '',
         idx: saved.idx || 0,
@@ -48,7 +50,7 @@ export default class App extends React.Component {
     const st = this.state;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        screen: st.screen, nameA: st.nameA, nameB: st.nameB, idx: st.idx,
+        nameA: st.nameA, nameB: st.nameB, idx: st.idx,
         answers: st.answers, order: st.order, tab: st.tab, divIdx: st.divIdx
       }));
     } catch (e) { /* quota ou mode privé : la passation continue sans sauvegarde */ }
@@ -59,14 +61,36 @@ export default class App extends React.Component {
     clearTimeout(this._copyTimer);
   }
 
+  /** Le nombre d'items où les deux ont répondu : ce qui est réellement reprenable. */
+  savedCount() {
+    const [a, b] = this.state.answers;
+    return Math.min(a.filter(Boolean).length, b.filter(Boolean).length);
+  }
+
+  /** « Commencer » efface la sauvegarde : on fait confirmer tant qu'il y a quelque chose à perdre. */
+  askStart() {
+    if (this.savedCount() > 0) this.setState({ confirmReset: true });
+    else this.start();
+  }
+
   start() {
     try { window.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
-    this.setState({ screen: 'quiz', idx: 0, answers: [[], []], order: scoring.makeOrders(), tab: 'profils', divIdx: 0 });
+    this.setState({ screen: 'quiz', idx: 0, answers: [[], []], order: scoring.makeOrders(), tab: 'profils', divIdx: 0, confirmReset: false });
   }
 
   resume() {
     const done = scoring.passationTerminee(this.state.answers);
     this.setState({ screen: done ? 'results' : 'quiz' });
+  }
+
+  /**
+   * Retour à l'accueil depuis la passation, réponses conservées. Le `clearTimeout` est
+   * indispensable : sans lui, une avance déjà programmée nous renverrait sur l'item
+   * suivant — ou sur les résultats — une fraction de seconde après le retour.
+   */
+  goHome() {
+    clearTimeout(this._advance);
+    this.setState({ screen: 'home', confirmReset: false });
   }
 
   /**
@@ -137,9 +161,7 @@ export default class App extends React.Component {
   renderHome() {
     const st = this.state;
     const total = DATA.items.length;
-    const doneA = st.answers[0].filter(Boolean).length;
-    const doneB = st.answers[1].filter(Boolean).length;
-    const savedCount = Math.min(doneA, doneB);
+    const savedCount = this.savedCount();
     const savedDone = scoring.passationTerminee(st.answers);
     const consignes = [
       "Chacun répond pour lui-même, sans se laisser influencer par l'autre.",
@@ -174,15 +196,23 @@ export default class App extends React.Component {
           </div>
         </div>
 
-        <div>
-          <button className="btn btn-primary btn-block" onClick={() => this.start()} disabled={!st.nameA.trim() || !st.nameB.trim()} style={{ minHeight: 50, fontSize: 16, margin: 0 }}>Commencer</button>
-          {savedCount > 0 && (
-            <button className="btn btn-secondary btn-block" onClick={() => this.resume()} style={{ minHeight: 46, fontSize: 14, margin: '8px 0 0' }}>
-              {savedDone ? 'Revoir le dernier résultat' : `Reprendre où nous en étions (${savedCount} / ${total})`}
-            </button>
-          )}
-          <p style={{ fontSize: 12, color: muted(48), margin: '10px 0 0' }}>Vos réponses sont conservées sur cet appareil. « Commencer » les efface.</p>
-        </div>
+        {st.confirmReset ? (
+          <div>
+            <p style={{ margin: '0 0 10px', fontSize: 14, color: muted(82) }}>Effacer les réponses en cours et recommencer ?</p>
+            <button className="btn btn-primary btn-block" onClick={() => this.start()} style={{ minHeight: 50, fontSize: 16, margin: 0 }}>Oui, effacer</button>
+            <button className="btn btn-secondary btn-block" onClick={() => this.setState({ confirmReset: false })} style={{ minHeight: 46, fontSize: 14, margin: '8px 0 0' }}>Annuler</button>
+          </div>
+        ) : (
+          <div>
+            <button className="btn btn-primary btn-block" onClick={() => this.askStart()} disabled={!st.nameA.trim() || !st.nameB.trim()} style={{ minHeight: 50, fontSize: 16, margin: 0 }}>Commencer</button>
+            {savedCount > 0 && (
+              <button className="btn btn-secondary btn-block" onClick={() => this.resume()} style={{ minHeight: 46, fontSize: 14, margin: '8px 0 0' }}>
+                {savedDone ? 'Revoir le dernier résultat' : `Reprendre où nous en étions (${savedCount} / ${total})`}
+              </button>
+            )}
+            <p style={{ fontSize: 12, color: muted(48), margin: '10px 0 0' }}>Vos réponses sont conservées sur cet appareil. « Commencer » les efface.</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -248,10 +278,11 @@ export default class App extends React.Component {
           })}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 40 }}>
-          {st.idx > 0
-            ? <button className="btn btn-ghost" onClick={() => this.back()} style={{ minHeight: 40, fontSize: 13 }}>← Question précédente</button>
-            : <span />}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, minHeight: 40 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {st.idx > 0 && <button className="btn btn-ghost" onClick={() => this.back()} style={{ minHeight: 40, fontSize: 13 }}>← Question précédente</button>}
+            <button className="btn btn-ghost" onClick={() => this.goHome()} style={{ minHeight: 40, fontSize: 13 }}>Accueil</button>
+          </div>
           <p role="status" style={{ margin: 0, fontSize: 12, color: muted(45) }}>{waiting}</p>
         </div>
       </div>
